@@ -6,7 +6,6 @@
                 <h4>Job Hunt</h4>
             </div>
             <ul class="nav-link">
-                <li><a href="/">Home</a></li>
                 <li><a href="/jobs">Find jobs</a></li>
                 <li><router-link :to="{ path: '/jobs', hash: '#categorieslink' }">Categories</router-link></li>
                 <li><a href="/companies">Companies</a></li>

@@ -39,8 +39,8 @@ function handleSubmit() {
         background-color: #0393ba;
         border-radius: 18px;
         box-shadow: 0 2px 4px #10c2f3b2;
-        width: 23%;
-        height: 70%;
+        min-width: 23%;
+        min-height: 70%;
         padding: 60px 50px;
     }
 

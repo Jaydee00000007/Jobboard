@@ -6848,7 +6848,7 @@ export default {
 
 .sec1{
     display: block;
-    height: 250px;
+    height: 290px;
     padding: 100px 150px;
     padding-bottom:4px;
     margin-left: 80px;
@@ -7112,6 +7112,31 @@ export default {
     font-weight: 700;
     color: #071a29;
     font-size: 14px;
+  }
+}
+
+.fav{
+  display: grid;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: center;
+
+
+  .save-job-btn,
+  .apply-job-btn{
+    background-color: #071a29;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+  }
+
+  .save-job-btn:active{
+    background-color: #12568a;
+  }
+  .apply-job-btn:hover {
+    background-color: #12568a;
   }
 
 }
