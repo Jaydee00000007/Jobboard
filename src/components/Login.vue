@@ -34,9 +34,8 @@ function handleSubmit() {
 
 <style scoped>
     .sign {
-        position: absolute;
         padding: 20px;
-        background-color: #0393ba;
+        background-color: #0aa6d1;
         border-radius: 18px;
         box-shadow: 0 2px 4px #10c2f3b2;
         min-width: 23%;

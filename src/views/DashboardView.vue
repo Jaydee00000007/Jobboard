@@ -296,7 +296,7 @@
                 <div class="profile-detail">
                   <h4>{{ userProfile.name }}</h4>
                   <span class="updated-specialization"
-                    >Product and visual designer · <span>{{ userProfile.location }}</span></span
+                    >{{ userProfile.skill }} · <span>{{ userProfile.location }}</span></span
                   >
                 </div>
               </div>

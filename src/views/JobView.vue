@@ -27,7 +27,7 @@
                   <div class="part1">
                       <ul>
                           <li id="categorieslink" :class="{ active: selectedCategory === '' }">
-                            <a href="#" @click.prevent="setCategory('')">All categories</a><span>36</span>
+                            <a href="#" @click.prevent="setCategory('')">All categories</a><span>{{ filteredJobs.length }}</span>
                           </li>
                           <li :class="{ active: selectedCategory === 'Design' }">
                             <a href="#" @click.prevent="setCategory('Design')">Design</a><span>74</span>

@@ -9,6 +9,8 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     role: 'Job seeker',
     location: 'Lagos',
     email: 'adaeze@example.com',
+    skill: 'Product and visual designer',
+    password: 'password123',
   })
 
   const applications = ref([
