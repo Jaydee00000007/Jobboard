@@ -112,7 +112,7 @@
         flex-direction: row;
         justify-content: center;
         align-items: flex-start;
-        background-color: #071a29;
+        /* background-color: #071a29; */
         gap: 50px;
         padding: 100px 4rem;
         box-sizing: border-box;
