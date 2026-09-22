@@ -42,7 +42,7 @@ const routes = [
     path: '/contact',
     name: 'contact',
     component: ContactView
-  }
+  },
 ]
 
 const router = createRouter({
