@@ -65,7 +65,7 @@
                           <button
                             type="button"
                             class="view-all-link"
-                            @click="setActiveTab('messages')"
+                            @click="setActiveTab('applications')"
                           >
                             View all
                           </button>
@@ -274,9 +274,17 @@
                   <div class="message-body">{{ selectedMessage.body }}</div>
                   <div class="message-meta">
                     <span>{{ selectedMessage.time }}</span>
-                    <button type="button" class="reply-btn" @click="replyToMessage">Reply</button>
+                    <div class="reply-section">
+                        <textarea
+                          class="reply-input"
+                          v-model="selectedMessage.reply"
+                          type="text"
+                          placeholder="Type your reply...">
+                          </textarea> 
+                        <button type="button" class="reply-btn" @click="replyToMessage">Reply</button>
                   </div>
-                  <p v-if="replyStatus" class="reply-status">{{ replyStatus }}</p>
+                  <p v-if="replyStatus" class="reply-status">{{ replyStatus }}</p>  
+                    </div>
                 </div>
               </div>
             </div>
@@ -589,7 +597,7 @@ body {
   min-width: 0;
   width: auto;
   background: transparent;
-  height: 100%;
+  min-height: calc(100vh - 110px);
   padding: 22px 24px 40px;
 }
 
@@ -611,7 +619,7 @@ body {
 
 .overview-header .name-in {
   background: linear-gradient(135deg, #ffc857 0%, #ff9f1c 100%);
-  padding:1px 4px;
+  padding: 1px 4px;
   height: 56px;
   margin: 0;
   border-radius: 50px;
@@ -790,6 +798,12 @@ body {
   display: flex;
   flex-direction: column;
   padding: 10px 30px;
+  min-width: 0;
+}
+
+.app-content,
+.app-section .tab-content {
+  min-width: 0;
 }
 
 .app-section .nav .nav-item .nav-link {
@@ -805,6 +819,7 @@ body {
 }
 
 .app-section table {
+  width: 100%;
   border: 1px solid rgba(7, 26, 41, 0.08);
   background: rgba(255, 255, 255, 0.7);
   border-radius: 16px;
@@ -880,12 +895,30 @@ body {
   line-height: 1.6;
 }
 
+.message-btn .nav-link {
+  margin-top: 10px;
+}
+
 .message-meta {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 18px;
   color: rgba(15, 23, 42, 0.7);
+}
+
+.reply-input{
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid rgba(20, 134, 195, 0.28);
+  border-radius: 10px;
+  margin-right: 8px;
+  min-width: 120px;
+  max-width: 30%;
+  min-height: 60px;
+  max-height: 150px;
+  position: relative;
+  resize: vertical;
 }
 
 .reply-status {
@@ -972,6 +1005,8 @@ body {
 }
 
 .message-btn {
+  flex: 0 1 340px;
+  min-width: 220px;
   border: 1px solid rgba(1, 16, 28, 0.12);
   padding: 14px 10px;
   border-radius: 16px;
@@ -981,8 +1016,9 @@ body {
 .message-btn .nav-link {
   color: #01101c;
   text-align: start;
-  height: 78px;
-  width: auto;
+  min-height: 78px;
+  height: auto;
+  width: 100%;
   border-radius: 12px;
   padding: 10px 12px;
   background: transparent;
@@ -995,7 +1031,9 @@ body {
 
 .message-btn .nav-link p {
   font-size: medium;
-  text-wrap: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   margin: 0;
 }
 
@@ -1003,14 +1041,14 @@ body {
   background: linear-gradient(135deg, #01101c 0%, #0c2236 100%);
   color: #d2efff;
   text-align: start;
-  height: 78px;
 }
 
 .tab-pane {
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.9) 0%, rgba(228, 239, 250, 0.9) 100%);
   color: #01101c;
   width: 100%;
-  height: 100%;
+  min-height: calc(100vh - 160px);
+  height: auto;
   padding: 20px 18px;
   border-radius: 18px;
   border: 1px solid rgba(7, 26, 41, 0.06);

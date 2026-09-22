@@ -350,6 +350,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     replyToMessage,
     savedJobs,
     savedJobsCount,
+    selectMessage,
     selectedMessage,
     settings,
     signIn,
