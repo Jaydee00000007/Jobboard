@@ -71,15 +71,63 @@
               </div>
           </div>
       </section>
-      <section class="partD">
-          <div class="sub-head">
-              <h3>About Job Hunt</h3>
+      <section class="partD contact">
+          <div class="secA">
+              <div class="contact-top">
+                    <h2>Get in touch</h2>
+                    <p>Questions about a listing, your account, or partnering with us? We usually reply within a day.</p>
+              </div>
+              <div class="sub-contact">
+                  <div class="c-one">
+                        <div class="ico"></div>
+                        <div class="c-detail">
+                            <span>Email</span>
+                            <h4>hello@roleboard.com</h4>
+                        </div>
+                  </div>
+                  <div class="c-two">
+                        <div class="ico"></div>
+                        <div class="c-detail">
+                            <span>Phone</span>
+                            <h4>+234 801 234 5678</h4>
+                        </div>
+                  </div>
+                  <div class="c-three">
+                        <div class="ico"></div>
+                        <div class="c-detail">
+                            <span>Office</span>
+                            <h4>14 Adeola Odeku St, Victoria Island, Lagos</h4>
+                        </div>
+                  </div>
+                  <div class="c-four">
+                        <div class="ico1"></div>
+                        <div class="ico1"></div>
+                        <div class="ico1"></div>
+                  </div> 
+              </div>
           </div>
-          <div class="head">
-              <h1>Built by people who've sat on both sides of the hiring table.</h1>
-          </div>
-          <div class="text-body">
-              <p>We started Roleboard after one too many applications vanished into dead job posts. Every listing here is verified, every company is real, and every update reaches you — that's the whole idea.</p>
+          <div class="secB">
+                <form>
+                    <div class="top">
+                        <div class="left">
+                            <label for="fullname">Full name</label>
+                            <input placeholder="Your name">
+                        </div>
+                        <div class="right">
+                            <label for="email">Email address</label>
+                            <input placeholder="you@email.com">
+                        </div>
+                    </div>
+                    <div class="subjectp">
+                        <label for="subject">Subject</label>
+                        <input placeholder="What's this about?">
+                    </div>
+                    <div class="messagep">
+                        <label for="message">Message</label>
+                        <textarea placeholder="What's this about?"></textarea>
+                    </div>
+                    <button>Send message</button>
+                </form>
           </div>
       </section>
       <Footer />
@@ -109,7 +157,7 @@ export default {
     box-sizing: border-box;
   }
 
-  .homepage {
+  .Aboutpage {
     min-height: 100dvh;
     background-color: #071a29;
   }
@@ -252,7 +300,7 @@ export default {
     .area2{
         display: flex;
         flex-direction: row;
-        gap: 20px;
+        gap: 380px;
         padding-left: 190px;
 
         .area2-a{
@@ -277,10 +325,12 @@ export default {
           display: flex;
           flex-direction: column;
           justify-content: center;
+          align-items: center;
           background-color: #d2efff;
-          gap: 100px;
+          gap: 10px;
           padding: 50px;
           width:30%;
+          border-radius: 15px;
 
           .verified-job{
             display: flex;
@@ -288,14 +338,71 @@ export default {
             align-items: center;
             background-color: #f0faff;
             width: 90%;
+            padding: 20px;
             border: 0px solid #071a2928;
+            border-radius: 20px;
 
             span{
               text-wrap: nowrap;
+            }
+
+            .second{
+              font-weight: lighter;
             }
           }
 
         }
     }
+}
+
+.contact{
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  color: #d2efff;
+  padding: 0px 190px;
+  padding-bottom: 60px;
+  padding-top: 60px;
+  margin: 0;
+
+  .secA{
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+
+    .contact-top{
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      h2{
+        font-size: 35px;
+        font-weight: 550;
+        margin: 0;
+      }
+      p{
+            font-size: 20px;
+            font-weight: 300;
+            margin: 0;
+            text-wrap: wrap;
+            width: 600px;
+        }
+    }
+
+    .sub-contact{
+      display: flex;
+      flex-direction: column;
+      gap: 0px;
+      padding:0;
+      margin: 0;
+
+      .c-one{
+      display: flex;
+      flex-direction: row;
+      gap: 0px;
+      padding:0;
+      margin: 0;
+      }
+    }
+  }
 }
 </style>
