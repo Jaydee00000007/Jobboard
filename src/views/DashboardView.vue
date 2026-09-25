@@ -1,5 +1,5 @@
 <template>
-  <div class="homepage">
+  <div class="dashboard">
     <HeaderB class="header" />
     <div class="sectionA">
       <div class="d-flex align-items-start">
@@ -503,7 +503,7 @@ body {
   min-height: 100vh;
 }
 
-.homepage {
+.dashbord {
   min-height: 100vh;
   background:
     radial-gradient(circle at top left, rgba(20, 134, 195, 0.18), transparent 30%),

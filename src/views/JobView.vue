@@ -1,5 +1,5 @@
 <template>
-  <div class="homepage">
+  <div class="jobpage">
      <HeaderB class="header"/>
       <div class="main">
           <section class="sec1">
@@ -6833,7 +6833,7 @@ export default {
     box-sizing: border-box;
   }
 
-  .homepage {
+  .jobpage {
     min-height: 100dvh;
     background-color: #071a29;
   }
@@ -6947,6 +6947,8 @@ export default {
   justify-content: center;
   align-items: center;
   height: 50%;
+  background: linear-gradient(135deg, rgba(227, 228, 230, 0.4), rgba(245, 238, 238, 0.039));
+  background-color: #d2efff;
   background-color: #fff;
   padding: 20px;
 

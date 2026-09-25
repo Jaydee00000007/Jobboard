@@ -8,3 +8,7 @@
   </nav>
   <RouterView />
 </template>
+
+<style>
+
+</style>
