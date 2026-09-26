@@ -10,7 +10,8 @@
     "format": "prettier --write --experimental-cli src/",
     "lint": "eslint . --ext .js,.vue",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "typecheck": "vue-tsc --noEmit"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
