@@ -6,7 +6,7 @@
       <p>{{ job.company }} • {{ job.location }}</p>
       <ul>
         <li>{{ job.type }}</li>
-        <li>{{ job.level }}</li>
+        <li>{{ job.experienceLevel }}</li>
         <li>{{ job.category }}</li>
       </ul>
       <p class="salary">{{ job.salaryText }}</p>
