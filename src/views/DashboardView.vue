@@ -396,7 +396,6 @@ import HeaderB from '../components/HeaderB.vue'
 import Footer from '../components/Footer.vue'
 import Fileupload from '../components/Fileupload.vue'
 import { useJobhuntStore } from '../stores/jobhunt'
-import type { Settings } from '../types/store'
 
 const store = useJobhuntStore()
 
