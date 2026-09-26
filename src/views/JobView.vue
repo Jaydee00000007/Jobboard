@@ -128,7 +128,7 @@ const filteredJobs = computed(() => {
       const matchesType = !selectedJobTypes.value.length ||
         selectedJobTypes.value.includes(job.type)
       const matchesExperience = !selectedExperience.value ||
-        job.level === selectedExperience.value
+        job.experienceLevel === selectedExperience.value
       const matchesSalary = !selectedSalaryRanges.value.length ||
         selectedSalaryRanges.value.includes(job.salaryRank)
 
