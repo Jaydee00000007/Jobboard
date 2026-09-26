@@ -234,7 +234,14 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     }
 
     if (typeof job === 'object') {
-      savedJobs.value.push({ ...job, saved: true })
+      savedJobs.value.push({
+        id: job.id,
+        initials: job.initials,
+        title: job.title,
+        location: `${job.company} · ${job.location}`,
+        pay: job.salaryText,
+        saved: true,
+      })
     }
   }
 
