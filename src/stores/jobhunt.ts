@@ -1,32 +1,32 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
-
+import type { Job } from '../types/job'
+import type { Application, ApplicationStatus, AuthPayload, Message, Notification, SavedJob, Settings, Skill, UserProfile } from '../types/store'
 export const useJobhuntStore = defineStore('jobhunt', () => {
   const isAuthenticated = ref(false)
-  const userProfile = ref({
+  const userProfile = ref<UserProfile>({
     name: 'Adaeze Okonkwo',
     initials: 'AO',
     role: 'Job seeker',
     location: 'Lagos',
     email: 'adaeze@example.com',
     skill: 'Product and visual designer',
-    password: 'password123',
   })
 
-  const applications = ref([
+  const applications = ref<Application[]>([
     { role: 'Senior Product Designer', company: 'Finotech', status: 'Interview', date: 'Jul 9' },
     {
       role: 'Brand & Packaging Lead',
       company: 'Bramwell & Co.',
-      status: 'Under review',
+      status: 'Under review' as ApplicationStatus,
       date: 'Jul 6',
     },
     { role: 'UX Designer', company: 'Novara', status: 'Offer', date: 'Jun 30' },
     { role: 'Visual Designer', company: 'Axilo Systems', status: 'Not selected', date: 'Jun 22' },
-    { role: 'Product Designer', company: 'Paruxx', status: 'Under review', date: 'Jun 30' },
+    { role: 'Product Designer', company: 'Paruxx', status: 'Under review' as ApplicationStatus, date: 'Jun 30' },
   ])
 
-  const savedJobs = ref([
+  const savedJobs = ref<SavedJob[]>([
     {
       id: 1,
       initials: 'DL',
@@ -61,7 +61,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     },
   ])
 
-  const inboxMessages = ref([
+  const inboxMessages = ref<Message[]>([
     {
       id: 1,
       company: 'Novara',
@@ -91,7 +91,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     },
   ])
 
-  const notifications = ref([
+  const notifications = ref<Notification[]>([
     {
       id: 1,
       message: 'Finotech moved your application to the interview stage.',
@@ -115,13 +115,13 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     },
   ])
 
-  const settings = ref({
+  const settings = ref<Settings>({
     emailNotifications: true,
     profileVisibility: true,
     twoFactorAuth: false,
   })
 
-  const skills = ref([
+  const skills = ref<Skill[]>([
     { id: 1, name: 'UX design', selected: true },
     { id: 2, name: 'Branding', selected: true },
     { id: 3, name: 'Packaging', selected: false },
@@ -210,20 +210,20 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
   )
   const savedJobsCount = computed(() => savedJobs.value.filter((job) => job.saved).length)
 
-  function setActiveTab(tab) {
+  function setActiveTab(tab: string) {
     activeTab.value = tab
     replyStatus.value = ''
   }
 
-  function toggleApplicationFilter(filter) {
+  function toggleApplicationFilter(filter: string) {
     activeApplicationFilter.value = filter
   }
 
-  function isJobSaved(jobId) {
+  function isJobSaved(jobId: number) {
     return savedJobs.value.some((job) => job.id === jobId && job.saved)
   }
 
-  function toggleSavedJob(job) {
+  function toggleSavedJob(job: Job | number) {
     const jobId = typeof job === 'object' ? job.id : job
 
     const existingJob = savedJobs.value.find((entry) => entry.id === jobId)
@@ -238,13 +238,13 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     }
   }
 
-  function toggleNotificationRead(id) {
+  function toggleNotificationRead(id: number) {
     notifications.value = notifications.value.map((notification) =>
       notification.id === id ? { ...notification, read: true } : notification,
     )
   }
 
-  function selectMessage(id) {
+  function selectMessage(id: number) {
     activeMessageId.value = id
   }
 
@@ -259,17 +259,17 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     replyStatus.value = `Draft reply ready for ${selectedMessage.value.company}.`
   }
 
-  function toggleSkill(id) {
+  function toggleSkill(id: number) {
     skills.value = skills.value.map((skill) =>
       skill.id === id ? { ...skill, selected: !skill.selected } : skill,
     )
   }
 
-  function updateSettings(partialSettings) {
+  function updateSettings(partialSettings: Partial<Settings>) {
     settings.value = { ...settings.value, ...partialSettings }
   }
 
-  function signIn(payload) {
+  function signIn(payload: AuthPayload) {
     isAuthenticated.value = true
     userProfile.value = {
       ...userProfile.value,
@@ -292,7 +292,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     })
   }
 
-  function signUp(payload) {
+  function signUp(payload: AuthPayload) {
     isAuthenticated.value = true
     userProfile.value = {
       ...userProfile.value,
@@ -315,7 +315,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     })
   }
 
-  function applyForJob(job) {
+  function applyForJob(job: Job) {
     applications.value.unshift({
       role: job.title,
       company: job.company,

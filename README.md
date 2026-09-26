@@ -1,38 +1,102 @@
 # Jobboard
 
-This template should help get you started developing with Vue 3 in Vite.
+A modern job discovery and application dashboard built with Vue 3. Jobboard lets users browse vacancies, filter roles, save jobs, apply for positions, and manage application activity from a personal dashboard.
 
-## Recommended IDE Setup
+## Live project
 
-[VS Code](https://code.visualstudio.com/) + [Vue (Official)](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+- Repository: https://github.com/Jaydee00000007/Jobboard
+- Live demo: Add your deployed URL here
 
-## Recommended Browser Setup
+## Core features
 
-- Chromium-based browsers (Chrome, Edge, Brave, etc.):
-  - [Vue.js devtools](https://chromewebstore.google.com/detail/vuejs-devtools/nhdogjmejiglipccpnnnanhbledajbpd)
-  - [Turn on Custom Object Formatter in Chrome DevTools](http://bit.ly/object-formatters)
-- Firefox:
-  - [Vue.js devtools](https://addons.mozilla.org/en-US/firefox/addon/vue-js-devtools/)
-  - [Turn on Custom Object Formatter in Firefox DevTools](https://fxdx.dev/firefox-devtools-custom-object-formatters/)
+- Job search by title, company, category, and location
+- Job category, employment type, experience, and salary filters
+- Sorting and pagination
+- Save and unsave jobs
+- Job application flow
+- User dashboard
+- Application status tracking
+- Notifications and messages
+- Profile and preference settings
+- Responsive UI
+- Client-side state management
 
-## Customize configuration
+## Tech stack
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+- Vue 3
+- Vite
+- Vue Router
+- Pinia
+- Font Awesome
+- JavaScript
+- CSS
 
-## Project Setup
+## Architecture
 
-```sh
+```text
+src/
+├── components/    # Reusable UI and feature components
+├── views/         # Application pages
+├── stores/        # Pinia state and business actions
+├── router/        # Client-side routes
+├── images/        # Project assets
+└── main.js        # Application entry point
+```
+
+## Getting started
+
+### Requirements
+
+- Node.js 22+ recommended
+- npm
+
+### Installation
+
+```bash
+git clone https://github.com/Jaydee00000007/Jobboard.git
+cd Jobboard
 npm install
 ```
 
-### Compile and Hot-Reload for Development
+### Development
 
-```sh
+```bash
 npm run dev
 ```
 
-### Compile and Minify for Production
+### Production build
 
-```sh
+```bash
 npm run build
 ```
+
+## Engineering notes
+
+This project currently uses local demo data and client-side state. Authentication, persistence, API integration, automated tests, and backend services are the next production-readiness stage.
+
+## What I learned
+
+- Structuring a Vue application beyond a single page
+- Managing shared application state with Pinia
+- Building filtering and pagination logic
+- Working with Vue Router
+- Designing interactive dashboard workflows
+- Separating UI concerns from application state
+
+## Roadmap
+
+- [x] Protected dashboard route
+- [ ] Real authentication
+- [ ] Backend/API integration
+- [ ] Persistent user data
+- [ ] TypeScript migration
+- [ ] Unit and component testing
+- [ ] ESLint and CI checks
+- [ ] Improved accessibility
+- [ ] Production deployment
+
+## Author
+
+**Jaydee Adeparusi**
+
+Frontend Developer focused on building clean, practical, user-focused web applications.
