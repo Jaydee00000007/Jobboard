@@ -4,12 +4,12 @@
         <h2>Welcome back</h2>
         <p>Pick up from where you stopped</p>
         <div class="info">
-            <label>Email address</label>
-            <input v-model="email" type="email" placeholder="you@email.com" />
-            <label>Password</label>
-            <input v-model="password" type="password" placeholder="Create a password" required />
+            <label for="login-email">Email address</label>
+            <input id="login-email" v-model="email" type="email" placeholder="you@email.com" autocomplete="email" required />
+            <label for="login-password">Password</label>
+            <input id="login-password" v-model="password" type="password" placeholder="Enter your password" autocomplete="current-password" required />
             <button type="submit">Sign in</button>
-            <button type="submit">Continue with Google</button>
+            <button type="button" disabled aria-disabled="true">Continue with Google (coming soon)</button>
            <div class="btom">
                 <p class="log">Don't have an account? <a href="#" @click.prevent="emit('switch')">Sign up</a></p>
            </div>
