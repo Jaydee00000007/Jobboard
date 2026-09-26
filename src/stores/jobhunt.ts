@@ -73,14 +73,18 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
   ])
 
   const filteredApplications = computed(() => {
-    if (activeApplicationFilter.value === 'all') return applications.value
-    const statusMap: Record<Exclude<typeof activeApplicationFilter.value, 'all'>, ApplicationStatus> = {
+    const filter = activeApplicationFilter.value
+
+    if (filter === 'all') return applications.value
+
+    const statusMap = {
       interview: 'Interview',
       'under-review': 'Under review',
       offer: 'Offer',
       'not-selected': 'Not selected',
-    }
-    return applications.value.filter((item) => item.status === statusMap[activeApplicationFilter.value])
+    } satisfies Record<'interview' | 'under-review' | 'offer' | 'not-selected', ApplicationStatus>
+
+    return applications.value.filter((item) => item.status === statusMap[filter])
   })
 
   const selectedMessage = computed(() => inboxMessages.value.find((message) => message.id === activeMessageId.value) || inboxMessages.value[0])
