@@ -164,37 +164,27 @@
               <p>{{ applications.length }} applications sent across 4 stages.</p>
             </div>
             <div class="app-content">
-              <ul class="nav nav-pills mb-3" role="tablist">
-                <li
-                  v-for="filter in applicationFilters"
-                  :key="filter.id"
-                  class="nav-item"
-                  role="presentation"
-                >
+              <ul class="application-filters" aria-label="Filter applications">
+                <li v-for="filter in applicationFilters" :key="filter.id">
                   <button
-                    class="nav-link"
+                    class="application-filter"
                     :class="{ active: activeApplicationFilter === filter.id }"
                     type="button"
+                    :aria-pressed="activeApplicationFilter === filter.id"
                     @click="toggleApplicationFilter(filter.id)"
                   >
-                    {{ filter.label }} <span>{{ filter.count }}</span>
+                    {{ filter.label }} <span class="filter-count">{{ filter.count }}</span>
                   </button>
                 </li>
               </ul>
-              <div class="tab-content">
-                <table class="table t-app">
+              <div class="applications-table-wrap">
+                <table class="applications-table">
                   <thead>
                     <tr>
-                      <th>Recent applications</th>
-                      <th></th>
-                      <th></th>
-                      <th></th>
-                    </tr>
-                    <tr>
-                      <th scope="col">ROLE</th>
-                      <th scope="col">COMPANY</th>
-                      <th scope="col">STATUS</th>
-                      <th scope="col">APPLIED</th>
+                      <th scope="col">Role</th>
+                      <th scope="col">Company</th>
+                      <th scope="col">Status</th>
+                      <th scope="col">Applied</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -204,8 +194,15 @@
                     >
                       <td scope="row">{{ application.role }}</td>
                       <td>{{ application.company }}</td>
-                      <td>{{ application.status }}</td>
-                      <td>{{ application.date }}</td>
+                      <td>
+                        <span
+                          class="application-status"
+                          :class="`status-${application.status.toLowerCase().replaceAll(' ', '-')}`"
+                        >
+                          {{ application.status }}
+                        </span>
+                      </td>
+                      <td class="application-date">{{ application.date }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -275,16 +272,17 @@
                   <div class="message-meta">
                     <span>{{ selectedMessage.time }}</span>
                     <div class="reply-section">
-                        <textarea
-                          class="reply-input"
-                          v-model="selectedMessage.reply"
-                          type="text"
-                          placeholder="Type your reply...">
-                          </textarea> 
-                        <button type="button" class="reply-btn" @click="replyToMessage">Reply</button>
-                  </div>
-                  <p v-if="replyStatus" class="reply-status">{{ replyStatus }}</p>  
+                      <textarea
+                        class="reply-input"
+                        v-model="selectedMessage.reply"
+                        type="text"
+                        placeholder="Type your reply..."
+                      >
+                      </textarea>
+                      <button type="button" class="reply-btn" @click="replyToMessage">Reply</button>
                     </div>
+                    <p v-if="replyStatus" class="reply-status">{{ replyStatus }}</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -801,30 +799,163 @@ body {
   min-width: 0;
 }
 
+.app-head {
+  margin-bottom: 22px;
+}
+
+.app-head h3 {
+  margin: 0;
+  color: #071a29;
+  font-size: 1.6rem;
+}
+
+.app-head p {
+  margin: 6px 0 0;
+  color: rgba(15, 23, 42, 0.65);
+}
+
 .app-content,
 .app-section .tab-content {
   min-width: 0;
 }
 
-.app-section .nav .nav-item .nav-link {
-  color: #01101c;
+.app-section .application-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 0;
+  margin: 0 0 18px;
+  list-style: none;
+}
+
+.application-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 38px;
+  padding: 7px 12px;
+  border: 1px solid rgba(7, 26, 41, 0.12);
+  border-radius: 6px;
+  background: #ffffff;
+  color: #334155;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.application-filter:hover {
+  border-color: rgba(20, 134, 195, 0.45);
+  background: #f3f9fc;
+}
+
+.application-filter.active {
+  border-color: #1486c3;
+  background: #e8f5fb;
+  color: #075985;
+}
+
+.filter-count {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 21px;
+  height: 21px;
+  padding: 0 5px;
   border-radius: 999px;
-  padding: 8px 14px;
+  background: rgba(7, 26, 41, 0.07);
+  color: inherit;
+  font-size: 0.75rem;
 }
 
-.app-section .nav .nav-item .nav-link.active {
-  background: linear-gradient(135deg, #01101c 0%, #0c2236 100%);
-  color: #d2efff;
-  box-shadow: 0 12px 22px rgba(5, 25, 34, 0.18);
+.application-filter.active .filter-count {
+  background: rgba(20, 134, 195, 0.14);
 }
 
-.app-section table {
+.applications-table-wrap {
   width: 100%;
-  border: 1px solid rgba(7, 26, 41, 0.08);
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.04);
+  overflow-x: auto;
+  border: 1px solid rgba(7, 26, 41, 0.1);
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.app-section .applications-table {
+  width: 100%;
+  min-width: 600px;
+  border: 0;
+  border-collapse: collapse;
+  background: transparent;
+  box-shadow: none;
+}
+
+.applications-table th,
+.applications-table td {
+  padding: 14px 18px;
+  text-align: left;
+  border-bottom: 1px solid rgba(7, 26, 41, 0.08);
+}
+
+.applications-table th {
+  background: #f4f8fb;
+  color: #526273;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.applications-table td {
+  color: #263746;
+  font-size: 0.92rem;
+}
+
+.applications-table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.applications-table tbody tr:hover {
+  background: #f8fbfd;
+}
+
+.applications-table td:first-child {
+  color: #071a29;
+  font-weight: 650;
+}
+
+.application-status {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 4px 9px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-interview,
+.status-offer {
+  background: #e7f5ee;
+  color: #18734a;
+}
+
+.status-under-review {
+  background: #fff4dc;
+  color: #8a5a00;
+}
+
+.status-not-selected {
+  background: #fcebea;
+  color: #a2352c;
+}
+
+.application-date {
+  white-space: nowrap;
 }
 
 .view-all-link,
@@ -907,7 +1038,7 @@ body {
   color: rgba(15, 23, 42, 0.7);
 }
 
-.reply-input{
+.reply-input {
   flex: 1;
   padding: 8px 12px;
   border: 1px solid rgba(20, 134, 195, 0.28);
@@ -1243,6 +1374,10 @@ input:checked + .slider:before {
     padding: 16px;
   }
 
+  .app-section {
+    padding: 10px 14px;
+  }
+
   .overview-content .partB {
     grid-template-columns: 1fr;
   }
@@ -1264,6 +1399,18 @@ input:checked + .slider:before {
 @media (max-width: 480px) {
   .sectionA .page-content {
     padding: 12px;
+  }
+
+  .app-section {
+    padding: 8px 10px;
+  }
+
+  .app-head {
+    margin-bottom: 18px;
+  }
+
+  .app-head h3 {
+    font-size: 1.4rem;
   }
 
   .overview-header {
