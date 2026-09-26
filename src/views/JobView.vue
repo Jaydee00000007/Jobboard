@@ -88,7 +88,7 @@ import Footer from '../components/Footer.vue'
 import JobCard from '../components/jobs/JobCard.vue'
 import JobFilters from '../components/jobs/JobFilters.vue'
 import JobSearch from '../components/jobs/JobSearch.vue'
-import { jobs } from '../data/jobs.js'
+import { jobs } from '../data/jobs'
 
 const store = useJobhuntStore()
 
