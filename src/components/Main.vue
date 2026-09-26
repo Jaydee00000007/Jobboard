@@ -9,10 +9,10 @@
             <p class="p1">THE LISTING BOARD BUILT FOR FINDERS, NOT SCROLLERS</p>
             <h1>Every open role worth having, in <span class="one">one place.</span></h1>
             <p class="p2">Job Hunt cuts the noise out of your job search. No
-                recycled postings, no dead links - every lsiting here is
-                verified, current, and posted by a team thats actually
+                recycled postings, no dead links - every listing here is
+                verified, current, and posted by a team that’s actually
                 hiring. If you're ready to stop searching and start
-                appplying, you're in the right place.  
+                applying, you're in the right place.  
             </p>
             <div class="hiring-update">
                 <h5>now hiring</h5>
@@ -42,23 +42,25 @@
 
 </template>
 
-<script setup>
+<script setup lang="ts">
     import { ref } from 'vue'
     import { useRouter } from 'vue-router'
     import Form from './Form.vue'
     import Login from './Login.vue'
-    import { useJobhuntStore } from '../stores/jobhunt.js'
+    import { useJobhuntStore } from '../stores/jobhunt'
 
     const isForm = ref(false)
     const router = useRouter()
     const store = useJobhuntStore()
 
-    function handleSignIn(payload) {
+    import type { AuthPayload } from '../types/store'
+
+    function handleSignIn(payload: AuthPayload) {
         store.signIn(payload)
         router.push('/dashboard')
     }
 
-    function handleSignUp(payload) {
+    function handleSignUp(payload: AuthPayload) {
         store.signUp(payload)
         router.push('/dashboard')
     }
