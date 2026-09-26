@@ -448,7 +448,6 @@ function toggleNotificationRead(id: number) { store.toggleNotificationRead(id) }
 function markAllNotificationsRead() { store.markAllNotificationsRead() }
 function replyToMessage() { store.replyToMessage() }
 function toggleSkill(id: number) { store.toggleSkill(id) }
-function updateSettings(partialSettings: Partial<Settings>) { store.updateSettings(partialSettings) }
 function selectMessage(id: number) { store.selectMessage(id) }
 </script>
 
