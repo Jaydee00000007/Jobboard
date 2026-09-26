@@ -390,94 +390,58 @@
   </div>
 </template>
 
-<script>
-import { mapState } from 'pinia'
+<script setup lang="ts">
+import { computed } from 'vue'
 import HeaderB from '../components/HeaderB.vue'
 import Footer from '../components/Footer.vue'
 import Fileupload from '../components/Fileupload.vue'
-import { useJobhuntStore } from '../stores/jobhunt.js'
+import { useJobhuntStore } from '../stores/jobhunt'
+import type { Settings } from '../types/store'
 
-export default {
-  name: 'DashboardView',
-  components: {
-    HeaderB,
-    Fileupload,
-    Footer,
-  },
-  data() {
-    return {
-      mainTabs: [
-        { id: 'overview', label: 'Overview' },
-        { id: 'applications', label: 'Applications' },
-        { id: 'savedjobs', label: 'Saved jobs' },
-        { id: 'messages', label: 'Messages' },
-        { id: 'profile', label: 'Profile' },
-        { id: 'settings', label: 'Settings' },
-      ],
-      jobhuntStore: null,
-    }
-  },
-  created() {
-    this.jobhuntStore = useJobhuntStore()
-  },
-  computed: {
-    ...mapState(useJobhuntStore, [
-      'activeTab',
-      'activeApplicationFilter',
-      'activeMessageId',
-      'replyStatus',
-      'applications',
-      'savedJobs',
-      'inboxMessages',
-      'notifications',
-      'settings',
-      'skills',
-      'overviewStats',
-      'recentApplications',
-      'applicationFilters',
-      'filteredApplications',
-      'selectedMessage',
-      'unreadMessageCount',
-      'allNotificationsRead',
-      'userProfile',
-    ]),
-    profileInitials() {
-      return this.userProfile.initials || 'AO'
-    },
-  },
-  methods: {
-    handleTabSelect(tab) {
-      this.jobhuntStore.setActiveTab(tab)
-    },
-    handleSavedJobToggle(jobId) {
-      this.jobhuntStore.toggleSavedJob(jobId)
-    },
-    handleSettingsUpdate() {
-      this.jobhuntStore.updateSettings(this.settings)
-    },
-    toggleApplicationFilter(filter) {
-      this.jobhuntStore.toggleApplicationFilter(filter)
-    },
-    toggleNotificationRead(id) {
-      this.jobhuntStore.toggleNotificationRead(id)
-    },
-    markAllNotificationsRead() {
-      this.jobhuntStore.markAllNotificationsRead()
-    },
-    replyToMessage() {
-      this.jobhuntStore.replyToMessage()
-    },
-    toggleSkill(id) {
-      this.jobhuntStore.toggleSkill(id)
-    },
-    updateSettings(partialSettings) {
-      this.jobhuntStore.updateSettings(partialSettings)
-    },
-    selectMessage(id) {
-      this.jobhuntStore.selectMessage(id)
-    },
-  },
-}
+const store = useJobhuntStore()
+
+type DashboardTab = 'overview' | 'applications' | 'savedjobs' | 'messages' | 'profile' | 'settings'
+
+const mainTabs: { id: DashboardTab; label: string }[] = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'applications', label: 'Applications' },
+  { id: 'savedjobs', label: 'Saved jobs' },
+  { id: 'messages', label: 'Messages' },
+  { id: 'profile', label: 'Profile' },
+  { id: 'settings', label: 'Settings' },
+]
+
+const activeTab = computed(() => store.activeTab as DashboardTab)
+const activeApplicationFilter = computed(() => store.activeApplicationFilter)
+const activeMessageId = computed(() => store.activeMessageId)
+const replyStatus = computed(() => store.replyStatus)
+const applications = computed(() => store.applications)
+const savedJobs = computed(() => store.savedJobs)
+const inboxMessages = computed(() => store.inboxMessages)
+const notifications = computed(() => store.notifications)
+const settings = computed(() => store.settings)
+const skills = computed(() => store.skills)
+const overviewStats = computed(() => store.overviewStats)
+const recentApplications = computed(() => store.recentApplications)
+const applicationFilters = computed(() => store.applicationFilters)
+const filteredApplications = computed(() => store.filteredApplications)
+const selectedMessage = computed(() => store.selectedMessage)
+const unreadMessageCount = computed(() => store.unreadMessageCount)
+const allNotificationsRead = computed(() => store.allNotificationsRead)
+const userProfile = computed(() => store.userProfile)
+const profileInitials = computed(() => userProfile.value.initials || 'AO')
+
+function setActiveTab(tab: DashboardTab) { store.setActiveTab(tab) }
+function handleTabSelect(tab: DashboardTab) { setActiveTab(tab) }
+function handleSavedJobToggle(jobId: number) { store.toggleSavedJob(jobId) }
+function handleSettingsUpdate() { store.updateSettings(settings.value) }
+function toggleApplicationFilter(filter: string) { store.toggleApplicationFilter(filter) }
+function toggleNotificationRead(id: number) { store.toggleNotificationRead(id) }
+function markAllNotificationsRead() { store.markAllNotificationsRead() }
+function replyToMessage() { store.replyToMessage() }
+function toggleSkill(id: number) { store.toggleSkill(id) }
+function updateSettings(partialSettings: Partial<Settings>) { store.updateSettings(partialSettings) }
+function selectMessage(id: number) { store.selectMessage(id) }
 </script>
 
 <style>
