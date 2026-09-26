@@ -31,7 +31,7 @@ describe('jobhunt store', () => {
 
   it('saves and unsaves a job', () => {
     const store = useJobhuntStore()
-    const job = jobs[0]
+    const job = jobs.find((entry) => !store.isJobSaved(entry.id))!
 
     expect(store.isJobSaved(job.id)).toBe(false)
 
