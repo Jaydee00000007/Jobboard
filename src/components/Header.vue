@@ -2,7 +2,7 @@
     <header class="blur">
         <nav>
             <div class="logo">
-                <img src="../images/logo.png" alt="Logo" />
+                <img src="../images/logo.svg" alt="Logo" />
                 <h4>Job Hunt</h4>
             </div>
             <ul class="nav-link">
