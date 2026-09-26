@@ -22,10 +22,17 @@
 </template>
 
 <script setup>
-defineProps({
-  job: { type: Object, required: true },
-  saved: { type: Boolean, default: false },
-})
+import type { Job } from '../../types/job'
+
+interface Props {
+  job: Job
+  saved?: boolean
+}
+
+defineProps<Props>()
+
+/*
+*/
 defineEmits(['toggle-save', 'apply'])
 </script>
 
