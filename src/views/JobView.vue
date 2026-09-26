@@ -80,30 +80,31 @@
   </div>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useJobhuntStore } from '../stores/jobhunt.js'
+import { useJobhuntStore } from '../stores/jobhunt'
 import HeaderB from '../components/HeaderB.vue'
 import Footer from '../components/Footer.vue'
 import JobCard from '../components/jobs/JobCard.vue'
 import JobFilters from '../components/jobs/JobFilters.vue'
 import JobSearch from '../components/jobs/JobSearch.vue'
 import { jobs } from '../data/jobs'
+import type { ExperienceLevel, Job, JobType, SalaryRank } from '../types/job'
 
 const store = useJobhuntStore()
 
 const searchQuery = ref('')
 const locationQuery = ref('')
 const selectedCategory = ref('')
-const selectedJobTypes = ref([])
-const selectedExperience = ref('')
-const selectedSalaryRanges = ref([])
+const selectedJobTypes = ref<JobType[]>([])
+const selectedExperience = ref<ExperienceLevel | ''>('')
+const selectedSalaryRanges = ref<SalaryRank[]>([])
 const sortBy = ref('newest')
 const currentPage = ref(1)
 const pageSize = 5
 
 const categories = computed(() => {
-  const counts = jobs.reduce((result, job) => {
+  const counts = jobs.reduce<Record<string, number>>((result, job) => {
     result[job.category] = (result[job.category] || 0) + 1
     return result
   }, {})
@@ -152,15 +153,15 @@ watch(filteredJobs, () => {
   if (currentPage.value > pageCount.value) currentPage.value = pageCount.value
 })
 
-function isSaved(jobId) {
+function isSaved(jobId: number) {
   return store.isJobSaved(jobId)
 }
 
-function toggleSavedJob(job) {
+function toggleSavedJob(job: Job) {
   store.toggleSavedJob(job)
 }
 
-function applyForJob(job) {
+function applyForJob(job: Job) {
   store.applyForJob(job)
 }
 
@@ -175,7 +176,7 @@ function resetFilters() {
   currentPage.value = 1
 }
 
-function setCategory(category) {
+function setCategory(category: string) {
   selectedCategory.value = category
   currentPage.value = 1
 }
