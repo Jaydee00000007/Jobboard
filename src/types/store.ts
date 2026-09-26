@@ -33,6 +33,7 @@ export interface Message {
   body: string
   time: string
   unread: boolean
+  reply: string
 }
 
 export type NotificationType = 'success' | 'warning'
