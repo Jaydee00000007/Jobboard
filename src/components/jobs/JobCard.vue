@@ -12,16 +12,16 @@
       <p class="salary">{{ job.salaryText }}</p>
     </div>
     <div class="job-actions">
-      <button type="button" @click="$emit('toggle-save', job)">
+      <button type="button" @click="emit('toggleSave', job)">
         {{ saved ? 'Saved' : 'Save' }}
       </button>
-      <button type="button" @click="$emit('apply', job)">Apply</button>
+      <button type="button" @click="emit('apply', job)">Apply</button>
       <span>Posted {{ job.posted }} ago</span>
     </div>
   </article>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import type { Job } from '../../types/job'
 
 interface Props {
@@ -31,9 +31,7 @@ interface Props {
 
 defineProps<Props>()
 
-/*
-*/
-defineEmits(['toggle-save', 'apply'])
+const emit = defineEmits<{ toggleSave: [job: Job]; apply: [job: Job] }>()
 </script>
 
 <style scoped>
