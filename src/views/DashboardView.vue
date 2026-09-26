@@ -423,7 +423,13 @@ const settings = computed(() => store.settings)
 const skills = computed(() => store.skills)
 const overviewStats = computed(() => store.overviewStats)
 const recentApplications = computed(() => store.recentApplications)
-const applicationFilters = computed(() => store.applicationFilters)
+const applicationFilters = computed(() =>
+  store.applicationFilters as Array<{
+    id: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected'
+    label: string
+    count: number
+  }>,
+)
 const filteredApplications = computed(() => store.filteredApplications)
 const selectedMessage = computed(() => store.selectedMessage)
 const unreadMessageCount = computed(() => store.unreadMessageCount)
