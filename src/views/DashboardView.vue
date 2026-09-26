@@ -435,7 +435,9 @@ function setActiveTab(tab: DashboardTab) { store.setActiveTab(tab) }
 function handleTabSelect(tab: DashboardTab) { setActiveTab(tab) }
 function handleSavedJobToggle(jobId: number) { store.toggleSavedJob(jobId) }
 function handleSettingsUpdate() { store.updateSettings(settings.value) }
-function toggleApplicationFilter(filter: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected') { store.toggleApplicationFilter(filter) }
+function toggleApplicationFilter(filter: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected') {
+  store.toggleApplicationFilter(filter)
+}
 function toggleNotificationRead(id: number) { store.toggleNotificationRead(id) }
 function markAllNotificationsRead() { store.markAllNotificationsRead() }
 function replyToMessage() { store.replyToMessage() }
