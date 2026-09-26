@@ -70,6 +70,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
       body: 'Hi Adaeze, we have attached the offer packet and would love to confirm the start date with you before the final handoff.',
       time: '10:20 AM',
       unread: true,
+      reply: '',
     },
     {
       id: 2,
@@ -79,6 +80,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
       body: 'Your interview is scheduled for 10 AM tomorrow. Please review the product brief and bring your portfolio.',
       time: 'Yesterday',
       unread: true,
+      reply: '',
     },
     {
       id: 3,
@@ -88,6 +90,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
       body: 'We loved your case study structure. A few tweaks to your process section will make it stronger.',
       time: '2 days ago',
       unread: false,
+      reply: '',
     },
   ])
 
