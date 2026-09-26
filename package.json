@@ -11,7 +11,8 @@
     "lint": "eslint . --ext .js,.vue",
     "test": "vitest run",
     "test:watch": "vitest",
-    "typecheck": "vue-tsc --noEmit"
+    "typecheck": "vue-tsc --noEmit",
+    "check": "npm run lint && npm run typecheck && npm test && npm run build"
   },
   "dependencies": {
     "@fortawesome/fontawesome-svg-core": "^7.3.1",
