@@ -7,7 +7,7 @@
 
     <fieldset>
       <legend>Job type</legend>
-      <label v-for="type in jobTypes" :key="type">
+      <label v-for="type in filterJobTypes" :key="type">
         <input type="checkbox" :value="type" v-model="types" @change="$emit('update:jobTypes', types)" />
         {{ type }}
       </label>
@@ -23,7 +23,7 @@
 
     <fieldset>
       <legend>Salary range</legend>
-      <label v-for="range in salaryRanges" :key="range.value">
+      <label v-for="range in filterSalaryRanges" :key="range.value">
         <input type="checkbox" :value="range.value" v-model="salaries" @change="$emit('update:salaryRanges', salaries)" />
         {{ range.label }}
       </label>
@@ -50,9 +50,9 @@ watch(() => props.jobTypes, value => { types.value = [...value] })
 watch(() => props.experience, value => { experience.value = value })
 watch(() => props.salaryRanges, value => { salaries.value = [...value] })
 
-const jobTypes = ['Full-time', 'Part-time', 'Contract', 'Remote']
+const filterJobTypes = ['Full-time', 'Part-time', 'Contract', 'Remote']
 const experienceLevels = ['Entry level', 'Mid level', 'Senior', 'Lead / Manager']
-const salaryRanges = [
+const filterSalaryRanges = [
   { value: 'low', label: '₦200k - ₦500k' },
   { value: 'medium', label: '₦500k - ₦1m' },
   { value: 'high', label: '₦1m+' },
