@@ -3,6 +3,21 @@ import { createPinia, setActivePinia } from 'pinia'
 import { useJobhuntStore } from '../src/stores/jobhunt'
 import { jobs } from '../src/data/jobs'
 
+const storage = new Map<string, string>()
+
+Object.defineProperty(globalThis, 'localStorage', {
+  value: {
+    get length() {
+      return storage.size
+    },
+    clear: () => storage.clear(),
+    getItem: (key: string) => storage.get(key) ?? null,
+    key: (index: number) => Array.from(storage.keys())[index] ?? null,
+    removeItem: (key: string) => storage.delete(key),
+    setItem: (key: string, value: string) => storage.set(key, value),
+  } satisfies Storage,
+})
+
 describe('jobhunt store', () => {
   beforeEach(() => {
     localStorage.clear()
