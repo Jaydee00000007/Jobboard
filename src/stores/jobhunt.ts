@@ -18,7 +18,7 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     {
       role: 'Brand & Packaging Lead',
       company: 'Bramwell & Co.',
-      status: 'Under review' as ApplicationStatus,
+      status: 'Under review',
       date: 'Jul 6',
     },
     { role: 'UX Designer', company: 'Novara', status: 'Offer', date: 'Jun 30' },
@@ -128,10 +128,10 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
     { id: 4, name: 'Figma', selected: true },
   ])
 
-  const activeTab = ref('overview')
-  const activeApplicationFilter = ref('all')
+  const activeTab = ref<'overview' | 'applications' | 'savedjobs' | 'messages' | 'profile' | 'settings'>('overview')
+  const activeApplicationFilter = ref<'all' | 'interview' | 'under-review' | 'offer' | 'not-selected'>('all')
   const activeMessageId = ref(1)
-  const replyStatus = ref('')
+  const replyStatus = ref<string>('')
 
   const overviewStats = computed(() => [
     {
@@ -210,12 +210,12 @@ export const useJobhuntStore = defineStore('jobhunt', () => {
   )
   const savedJobsCount = computed(() => savedJobs.value.filter((job) => job.saved).length)
 
-  function setActiveTab(tab: string) {
+  function setActiveTab(tab: 'overview' | 'applications' | 'savedjobs' | 'messages' | 'profile' | 'settings') {
     activeTab.value = tab
     replyStatus.value = ''
   }
 
-  function toggleApplicationFilter(filter: string) {
+  function toggleApplicationFilter(filter: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected') {
     activeApplicationFilter.value = filter
   }
 
