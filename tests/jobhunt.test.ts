@@ -5,6 +5,7 @@ import { jobs } from '../src/data/jobs'
 
 describe('jobhunt store', () => {
   beforeEach(() => {
+    localStorage.clear()
     setActivePinia(createPinia())
   })
 
