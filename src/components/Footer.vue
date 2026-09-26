@@ -1,7 +1,7 @@
 <template>
     <div class="footer">
         <div class="logo">
-            <img src="../images/logo.png" alt="Logo" />
+            <img src="../images/logo.svg" alt="Job Hunt logo" />
         </div>
         <div class="footer-sec1">
             <div class="footers">
@@ -61,13 +61,10 @@
 </template>
 
 <script>
-    export default {
-        
-    }
+    export default {}
 </script>
 
-<style  scoped>
-
+<style scoped>
     .footer{
         background-color: #d2efff;
         color: #071a29;
@@ -82,72 +79,72 @@
     }
 
     .logo img{
-            width: 80px;
-            height: auto;
-            margin-left: 250px;
-        }
+        width: 80px;
+        height: auto;
+        margin-left: 250px;
+    }
 
-        .footers,
-        .footer-sec1{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 5px;
-            padding: 0px 10px;
-            margin: 0px;
-            width: 100%;
-        }
+    .footers,
+    .footer-sec1{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 5px;
+        padding: 0px 10px;
+        margin: 0px;
+        width: 100%;
+    }
 
-        .footer-sec1{
-            width: auto;
-            padding: 0px 5px;
-        }
+    .footer-sec1{
+        width: auto;
+        padding: 0px 5px;
+    }
 
-        .footer-sec2,
-        .footerlist ul{
-            display: flex;
-            flex-direction: row;
-            align-items: center;
-            gap: 15px;
-            padding: 0px 10px;
-            text-align: center;
-            margin: 0px;
-            width: 100%;
-        }
+    .footer-sec2,
+    .footerlist ul{
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 15px;
+        padding: 0px 10px;
+        text-align: center;
+        margin: 0px;
+        width: 100%;
+    }
 
-        hr{
-            border: 1px solid #071a29;
-            margin: 10px 0;
-        }
+    hr{
+        border: 1px solid #071a29;
+        margin: 10px 0;
+    }
 
-        .lets-talk span{
-            color: #071a29;
-            width: 600px;
-            font-family: "Lato", sans-serif;
-            text-wrap: nowrap;
-            font-weight: 900;
-            font-style: normal;
-            font-size: 60px;
-            padding: 0px;
-        }
+    .lets-talk span{
+        color: #071a29;
+        width: 600px;
+        font-family: "Lato", sans-serif;
+        text-wrap: nowrap;
+        font-weight: 900;
+        font-style: normal;
+        font-size: 60px;
+        padding: 0px;
+    }
 
-        .copy{
-            text-align: center;
-        }
+    .copy{
+        text-align: center;
+    }
 
-        .footerst,
-        .footerlist{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 5px;
-            padding: 0px 10px;
-            margin: 0px;
-            width: 100%;
-        }
+    .footerst,
+    .footerlist{
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        padding: 0px 10px;
+        margin: 0px;
+        width: 100%;
+    }
 
-        .footerst ul,
-        .footerlist ul{
-            gap: 20px;
-        }
+    .footerst ul,
+    .footerlist ul{
+        gap: 20px;
+    }
 </style>
