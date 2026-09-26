@@ -29,7 +29,7 @@ interface Props {
   saved?: boolean
 }
 
-const props = defineProps<Props>()
+defineProps<Props>()
 
 const emit = defineEmits<{ toggleSave: [job: Job]; apply: [job: Job] }>()
 </script>
