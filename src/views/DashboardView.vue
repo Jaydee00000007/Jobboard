@@ -22,10 +22,11 @@
           </div>
           <div class="nav-footer">
             <div class="name-i">
-              <h4>AO</h4>
+              <h4>{{ profileInitials }}</h4>
               <div class="profile-name">
-                <p>Adaeze Okonkwo</p>
-                <span class="job-status">Job seeker</span>
+                <p>{{ userProfile.name }}</p>
+                <span class="job-status">{{ userProfile.role }}</span>
+                <button type="button" class="sign-out-btn" @click="signOut">Sign out</button>
               </div>
             </div>
           </div>
@@ -43,7 +44,7 @@
             </div>
             <div class="overview-content">
               <div class="partA">
-                <h3>Welcome back, Adaeze</h3>
+                <h3>Welcome back, {{ userProfile.name.split(" ")[0] }}</h3>
                 <p>Here’s what’s happening with your job search right now.</p>
               </div>
               <div class="partB">
@@ -392,12 +393,12 @@
 
 <script setup lang="ts">
 import { computed } from 'vue'
+import { useRouter } from 'vue-router'
 import HeaderB from '../components/HeaderB.vue'
-import Footer from '../components/Footer.vue'
-import Fileupload from '../components/Fileupload.vue'
 import { useJobhuntStore } from '../stores/jobhunt'
 
 const store = useJobhuntStore()
+const router = useRouter()
 
 type DashboardTab = 'overview' | 'applications' | 'savedjobs' | 'messages' | 'profile' | 'settings'
 
@@ -448,6 +449,10 @@ function markAllNotificationsRead() { store.markAllNotificationsRead() }
 function replyToMessage() { store.replyToMessage() }
 function toggleSkill(id: number) { store.toggleSkill(id) }
 function selectMessage(id: number) { store.selectMessage(id) }
+function signOut() {
+  store.signOut()
+  router.replace({ name: 'home' })
+}
 </script>
 
 <style>
@@ -1395,4 +1400,20 @@ input:checked + .slider:before {
     padding: 12px;
   }
 }
+</style>
+
+<style>
+.sign-out-btn {
+  margin-top: 8px;
+  padding: 5px 10px;
+  border: 1px solid rgba(210, 239, 255, 0.25);
+  border-radius: 999px;
+  background: transparent;
+  color: #d2efff;
+  font: inherit;
+  font-size: 0.75rem;
+  cursor: pointer;
+}
+.sign-out-btn:hover { background: rgba(255, 255, 255, 0.08); }
+.sign-out-btn:focus-visible { outline: 2px solid #36d2ff; outline-offset: 2px; }
 </style>
