@@ -32,7 +32,8 @@ export default [
       'vue/attributes-order': 'off',
       'vue/singleline-html-element-content-newline': 'off',
       'vue/multiline-html-element-content-newline': 'off',
-      'vue/component-definition-name-casing': 'off'
+      'vue/component-definition-name-casing': 'off',
+      'vue/html-closing-bracket-newline': 'off'
     }
   }
 ]
