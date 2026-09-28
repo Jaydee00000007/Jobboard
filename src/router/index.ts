@@ -1,12 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useJobhuntStore } from '../stores/jobhunt'
-import HomeView from '../views/HomeView.vue'
-import AboutView from '../views/AboutView.vue'
-import FaqView from '../views/FaqView.vue'
-import JobView from '../views/JobView.vue'
-import CompaniesView from '../views/CompaniesView.vue'
-import DashboardView from '../views/DashboardView.vue'
-import ContactView from '../views/ContactView.vue'
+const HomeView = () => import('../views/HomeView.vue')
+const AboutView = () => import('../views/AboutView.vue')
+const FaqView = () => import('../views/FaqView.vue')
+const JobView = () => import('../views/JobView.vue')
+const CompaniesView = () => import('../views/CompaniesView.vue')
+const DashboardView = () => import('../views/DashboardView.vue')
+const ContactView = () => import('../views/ContactView.vue')
 
 const routes = [
   { path: '/', name: 'home', component: HomeView, meta: { guestOnly: true } },
