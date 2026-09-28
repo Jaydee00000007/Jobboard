@@ -1,130 +1,190 @@
 <template>
-    <header>
-        <nav>
-            <div class="logo">
-                <img src="../images/logo.svg" alt="Logo" />
-                <h4>Job Hunt</h4>
-            </div>
-            <ul class="nav-link">
-                <li><a href="/jobs">Find jobs</a></li>
-                <li><router-link :to="{ path: '/jobs', hash: '#categorieslink' }">Categories</router-link></li>
-                <li><a href="/companies">Companies</a></li>
-                <li><a href="/about">About us</a></li>
-                <li><a href="/faq">FAQ</a></li>
-            </ul>
+  <header class="site-header">
+    <nav aria-label="Dashboard navigation">
+      <RouterLink class="logo" to="/" aria-label="Job Hunt home">
+        <img src="../images/logo.svg" alt="" />
+        <span>Job Hunt</span>
+      </RouterLink>
 
-            <div class="navp">
-                <a href="/">Sign out</a>
-                <div class="notify"><svg xmlns="http://www.w3.org/2000/svg" height="35px" viewBox="0 -960 960 960" width="40px" fill="#071a29"><path d="M519.7-236.01q16.28-16.53 16.6-39.8H423.04q.32 23.27 17.09 39.8 16.77 16.52 40.03 16.52t39.54-16.52Zm-234.66-93.14H674.3v-64.59h-40v-112.37q0-60.31-31.42-110.58-31.42-50.27-88.58-62.19v-27.23q0-14.46-9.92-24.38-9.91-9.92-24.45-9.92-14.53 0-24.71 9.92-10.18 9.92-10.18 24.38v27.23q-57 11.92-88.5 60.6t-31.5 108.17v116.37h-40v64.59Zm105.63-64.59v-126.33q0-37.88 25.83-64.91Q442.33-612 479.67-612q37.33 0 63.16 27.02 25.84 27.03 25.84 64.91v126.33h-178ZM480.2-73.3q-84.44 0-158.48-31.96-74.03-31.96-129.27-87.19-55.23-55.24-87.19-129.3Q73.3-395.82 73.3-480.31q0-84.5 31.96-158.58 31.96-74.09 87.17-129t129.28-86.94q74.08-32.03 158.59-32.03t158.61 32.02q74.11 32.02 129 86.91 54.9 54.88 86.92 129.08 32.03 74.2 32.03 158.67 0 84.46-32.03 158.5-32.03 74.03-86.94 129.12t-129.08 87.17Q564.64-73.3 480.2-73.3Zm.13-75.76q138.05 0 234.33-96.51 96.28-96.52 96.28-234.76 0-138.05-96.16-234.33-96.15-96.28-234.86-96.28-137.79 0-234.33 96.16-96.53 96.15-96.53 234.86 0 137.79 96.51 234.33 96.52 96.53 234.76 96.53ZM480-480Z"/></svg></div>
-                <router-link :to="{ path: '/dashboard',}"><button class="dashboard">Dashboard</button></router-link>
-            </div>
-            
-        </nav>
-    </header>
+      <button
+        class="menu-toggle"
+        type="button"
+        :aria-expanded="menuOpen"
+        aria-controls="primary-menu"
+        aria-label="Toggle navigation"
+        @click="menuOpen = !menuOpen"
+      >
+        <span></span><span></span><span></span>
+      </button>
+
+      <div id="primary-menu" class="nav-content" :class="{ open: menuOpen }">
+        <ul class="nav-link">
+          <li><RouterLink to="/jobs" @click="closeMenu">Find jobs</RouterLink></li>
+          <li><RouterLink :to="{ path: '/jobs', hash: '#categorieslink' }" @click="closeMenu">Categories</RouterLink></li>
+          <li><RouterLink to="/companies" @click="closeMenu">Companies</RouterLink></li>
+          <li><RouterLink to="/about" @click="closeMenu">About us</RouterLink></li>
+          <li><RouterLink to="/faq" @click="closeMenu">FAQ</RouterLink></li>
+        </ul>
+
+        <div class="nav-actions">
+          <button type="button" class="sign-out" @click="signOut">Sign out</button>
+          <button type="button" class="dashboard" @click="goDashboard">Dashboard</button>
+        </div>
+      </div>
+    </nav>
+  </header>
 </template>
 
-<script>
-export default {
-  name: 'Header'
+<script setup lang="ts">
+import { ref } from 'vue'
+import { useRouter } from 'vue-router'
+import { useJobhuntStore } from '../stores/jobhunt'
+
+const router = useRouter()
+const store = useJobhuntStore()
+const menuOpen = ref(false)
+
+function closeMenu() {
+  menuOpen.value = false
+}
+
+function signOut() {
+  closeMenu()
+  store.signOut()
+  router.replace({ name: 'home' })
+}
+
+function goDashboard() {
+  closeMenu()
+  router.push({ name: 'dashboard' })
 }
 </script>
 
 <style scoped>
-        nav{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: px;
-            padding: 0px 0px;
-            background-color: #d2efff;
-            width: 100%;
-            height: 60px;
-            box-shadow: 0 4px 30px #071a29;
-        }
+.site-header {
+  position: relative;
+  z-index: 1000;
+  background: rgba(7, 26, 41, 0.96);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 24px rgba(7, 26, 41, 0.22);
+}
 
-        .blur{
-            background-color: #061724;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 4px 30px #071a29;
-        }
+nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  min-height: 64px;
+  padding: 0 24px;
+}
 
-        .logo img{
-            width: 40px;
-            height: auto;
-        }
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex: 0 0 auto;
+  width: auto;
+  min-height: 38px;
+  padding: 0 12px 0 8px;
+  border-radius: 999px;
+  background: #d2efff;
+  color: #071a29;
+  text-decoration: none;
+  font-weight: 900;
+  font-size: 14px;
+}
 
-        .logo{
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 0px;
-            height: 37px;
-            width: 150px;
-            background-color: #d2efff;
-            border-radius: 40px;
-        }
+.logo img { width: 38px; height: 38px; }
 
-        .logo h4{
-            color: #071a29;
-            font-family: "Lato", sans-serif;
-            font-weight: 900;
-            font-style: normal;
-            font-size: 15px;
-        }
+.nav-content {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 24px;
+  flex: 1;
+}
 
-        .nav-link{
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 50px;
-        }
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: clamp(18px, 3vw, 42px);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
 
-        .nav-link a, li{
-            text-decoration: none;
-            list-style: none;
-            color: #061724;
-            font-family: "Lato", sans-serif;
-            font-weight: 700;
-            font-style: normal;
-            font-size: 13px;
-        }
-        nav a:hover{
-            color: #36d2ff;
-            border-bottom: 2px solid orange;
-            transition: 0.4s ease-in-out;
-        }
-        .dashboard{
-            background-color: orange;
-            color: #061724;
-            height: 35px;
-            width: 80px;
-            border: none;
-            border-radius: 8px;
-            text-align: center;
-            padding: 5px;
-            font-weight: bold;
-        }
-        .dashboard:hover{
-            color: #36d2ff;
-            background-color: #061724;
-            transition: 0.4s ease-in-out;
-        }
-        .navp{
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 0px 15px;
+.nav-link a {
+  color: #d2efff;
+  text-decoration: none;
+  font-size: 13px;
+  font-weight: 700;
+}
 
-            a{
-                text-decoration: none;
-                color: #071a29;
-                font-weight: bold;
-                font-size: 13px;
-            }
-            .notify{
-                
-            }
-        }
+.nav-link a:hover,
+.nav-link a.router-link-active { color: #36d2ff; }
 
+.nav-link a:focus-visible,
+.logo:focus-visible,
+.sign-out:focus-visible,
+.dashboard:focus-visible,
+.menu-toggle:focus-visible {
+  outline: 2px solid #36d2ff;
+  outline-offset: 3px;
+}
 
+.nav-actions { display: flex; align-items: center; gap: 10px; }
+
+.sign-out,
+.dashboard {
+  min-height: 36px;
+  border-radius: 8px;
+  padding: 0 13px;
+  border: 1px solid transparent;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sign-out { background: transparent; color: #d2efff; border-color: rgba(210,239,255,.28); }
+.dashboard { background: orange; color: #071a29; }
+
+.menu-toggle {
+  display: none;
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  margin: 5px 0;
+  background: #d2efff;
+}
+
+@media (max-width: 900px) {
+  nav { padding: 0 16px; }
+  .menu-toggle { display: block; }
+  .nav-content {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    padding: 18px 16px 20px;
+    flex-direction: column;
+    align-items: stretch;
+    background: #071a29;
+    box-shadow: 0 12px 24px rgba(7,26,41,.22);
+  }
+  .nav-content.open { display: flex; }
+  .nav-link { flex-direction: column; align-items: stretch; gap: 0; }
+  .nav-link li { width: 100%; }
+  .nav-link a { display: block; padding: 12px 8px; }
+  .nav-actions { justify-content: stretch; }
+  .nav-actions button { flex: 1; }
+}
 </style>
