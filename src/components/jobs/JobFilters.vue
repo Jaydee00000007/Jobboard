@@ -50,7 +50,7 @@ watch(() => props.jobTypes, value => { types.value = [...value] })
 watch(() => props.experience, value => { experience.value = value })
 watch(() => props.salaryRanges, value => { salaries.value = [...value] })
 
-const filterJobTypes = ['Full-time', 'Part-time', 'Contract', 'Remote']
+const filterJobTypes = ['Full-time', 'Part-time', 'Contract', 'Internship', 'Freelance']
 const experienceLevels = ['Entry level', 'Mid level', 'Senior', 'Lead / Manager']
 const filterSalaryRanges = [
   { value: 'low', label: '₦200k - ₦500k' },
@@ -64,6 +64,6 @@ const filterSalaryRanges = [
 .filter-header { display: flex; justify-content: space-between; align-items: center; }
 .filter-header h4, fieldset legend { margin: 0; font-weight: 800; }
 .clear { border: 0; background: none; color: orange; cursor: pointer; }
-fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }
+fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }\ninput { accent-color: #071a29; }\n.clear:focus-visible, input:focus-visible { outline: 2px solid #36d2ff; outline-offset: 2px; }
 fieldset label { display: flex; align-items: center; gap: 10px; }
 </style>
