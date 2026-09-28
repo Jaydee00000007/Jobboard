@@ -60,8 +60,7 @@
     </div>
 </template>
 
-<script>
-    export default {}
+<script setup lang="ts">
 </script>
 
 <style scoped>
@@ -81,7 +80,6 @@
     .logo img{
         width: 80px;
         height: auto;
-        margin-left: 250px;
     }
 
     .footers,
@@ -89,15 +87,15 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        gap: 5px;
-        padding: 0px 10px;
-        margin: 0px;
+        gap: 24px;
+        padding: 0 10px;
+        margin: 0;
         width: 100%;
     }
 
     .footer-sec1{
-        width: auto;
-        padding: 0px 5px;
+        width: 100%;
+        padding: 0 5px;
     }
 
     .footer-sec2,
@@ -106,9 +104,9 @@
         flex-direction: row;
         align-items: center;
         gap: 15px;
-        padding: 0px 10px;
+        padding: 0 10px;
         text-align: center;
-        margin: 0px;
+        margin: 0;
         width: 100%;
     }
 
@@ -118,14 +116,13 @@
     }
 
     .lets-talk span{
+        display: block;
         color: #071a29;
-        width: 600px;
         font-family: "Lato", sans-serif;
-        text-wrap: nowrap;
         font-weight: 900;
-        font-style: normal;
-        font-size: 60px;
-        padding: 0px;
+        font-size: clamp(2rem, 5vw, 3.75rem);
+        line-height: 1;
+        padding: 0;
     }
 
     .copy{
@@ -145,6 +142,36 @@
 
     .footerst ul,
     .footerlist ul{
-        gap: 20px;
+        gap: 12px;
+        padding-left: 0;
+    }
+
+    .footer a:focus-visible {
+        outline: 2px solid #36d2ff;
+        outline-offset: 3px;
+    }
+
+    @media (max-width: 700px) {
+        .footers,
+        .footer-sec1,
+        .footer-sec2 {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .footer-sec1,
+        .footer-sec2 {
+            gap: 18px;
+        }
+
+        .footerst,
+        .footerlist {
+            align-items: flex-start;
+        }
+
+        .footerlist ul {
+            flex-wrap: wrap;
+            text-align: left;
+        }
     }
 </style>
