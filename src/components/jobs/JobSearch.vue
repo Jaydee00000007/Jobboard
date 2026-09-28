@@ -68,6 +68,8 @@ watch(() => props.location, (value) => { modelLocation.value = value })
 }
 .location-wrap input { flex: 1; }
 .job-search input:focus { outline: none; }
+.job-search input:focus-visible,
+.search:focus-visible { outline: 2px solid #36d2ff; outline-offset: 2px; }
 .search {
   background: orange;
   border: none;
@@ -77,7 +79,10 @@ watch(() => props.location, (value) => { modelLocation.value = value })
   cursor: pointer;
 }
 @media (max-width: 700px) {
-  .job-search { flex-direction: column; align-items: stretch; }
-  .location-wrap { border-left: 0; border-top: 1px solid #071a29; padding-top: 8px; }
+  .job-search { flex-direction: column; align-items: stretch; padding: 12px; gap: 8px; }
+  .location-wrap { border-left: 0; border-top: 1px solid #071a29; padding-top: 8px; width: 100%; }
+  .job-search > input,
+  .location-wrap input { width: 100%; }
+  .search { width: 100%; }
 }
 </style>
