@@ -1,15 +1,21 @@
-export type ApplicationStatus = 'Interview' | 'Under review' | 'Offer' | 'Not selected'
+export type ApplicationStatus = 'Applied' | 'Interview' | 'Under review' | 'Offer' | 'Not selected'
 
 export interface UserProfile {
   name: string
   initials: string
   role: string
   location: string
+  phoneNumber: string
   email: string
   skill: string
+  about: string
+  birthDate: string
+  linkedinUrl: string
+  resumeName: string
 }
 
 export interface Application {
+  jobId?: number
   role: string
   company: string
   status: ApplicationStatus

@@ -61,6 +61,7 @@
                   :key="job.id"
                   :job="job"
                   :saved="isSaved(job.id)"
+                  :applied="isApplied(job.id)"
                   @toggle-save="toggleSavedJob"
                   @apply="applyForJob"
                 />
@@ -180,6 +181,10 @@ watch(filteredJobs, () => {
 
 function isSaved(jobId: number) {
   return store.isJobSaved(jobId)
+}
+
+function isApplied(jobId: number) {
+  return store.isJobApplied(jobId)
 }
 
 function toggleSavedJob(job: Job) {

@@ -33,6 +33,58 @@ describe('jobhunt store', () => {
     expect(store.unreadMessageCount).toBe(2)
   })
 
+  it('updates profile details and normalizes the skill list', () => {
+    const store = useJobhuntStore()
+
+    store.updateUserProfile({
+      name: 'Ada Lovelace',
+      location: 'Lagos',
+      phoneNumber: '+234 801 234 5678',
+      about: 'Product designer',
+      birthDate: '1990-12-10',
+      linkedinUrl: 'https://www.linkedin.com/in/ada',
+      resumeName: 'ada-resume.pdf',
+    })
+    store.updateProfileSkills([' UX design ', 'TypeScript', 'UX design', ''])
+
+    expect(store.userProfile).toMatchObject({
+      name: 'Ada Lovelace',
+      initials: 'AL',
+      location: 'Lagos',
+      phoneNumber: '+234 801 234 5678',
+      about: 'Product designer',
+      birthDate: '1990-12-10',
+      linkedinUrl: 'https://www.linkedin.com/in/ada',
+      resumeName: 'ada-resume.pdf',
+      skill: 'UX design, TypeScript',
+    })
+    expect(store.skills.map((skill) => skill.name)).toEqual(['UX design', 'TypeScript'])
+  })
+
+  it('preserves editable profile details and skills when the same account signs in again', async () => {
+    const store = useJobhuntStore()
+    const credentials = {
+      name: 'Original Name',
+      email: 'profile@example.com',
+      password: 'password123',
+      skill: 'Product design',
+    }
+
+    expect(await store.signUp(credentials)).toBe(true)
+    store.updateUserProfile({ name: 'Updated Name', location: 'Lagos', resumeName: 'resume.pdf' })
+    store.updateProfileSkills(['Research', 'Accessibility'])
+
+    store.signOut()
+    expect(await store.signIn(credentials)).toBe(true)
+    expect(store.userProfile).toMatchObject({
+      name: 'Updated Name',
+      location: 'Lagos',
+      resumeName: 'resume.pdf',
+      skill: 'Research, Accessibility',
+    })
+    expect(store.skills.map((skill) => skill.name)).toEqual(['Research', 'Accessibility'])
+  })
+
   it('filters applications by status', () => {
     const store = useJobhuntStore()
 
@@ -43,6 +95,12 @@ describe('jobhunt store', () => {
     store.toggleApplicationFilter('offer')
     expect(store.filteredApplications).toHaveLength(1)
     expect(store.filteredApplications[0].company).toBe('Novara')
+
+    const job = jobs[0]
+    store.applyForJob(job)
+    store.toggleApplicationFilter('applied')
+    expect(store.filteredApplications).toHaveLength(1)
+    expect(store.filteredApplications[0].jobId).toBe(job.id)
   })
 
   it('saves and unsaves a job', () => {
@@ -60,18 +118,43 @@ describe('jobhunt store', () => {
     expect(store.savedJobsCount).toBe(4)
   })
 
+  it('removes a saved job and allows it to be saved again', () => {
+    const store = useJobhuntStore()
+    const job = jobs.find((entry) => !store.isJobSaved(entry.id))!
+
+    store.toggleSavedJob(job)
+    expect(store.savedJobs.some((entry) => entry.id === job.id && entry.saved)).toBe(true)
+
+    store.removeSavedJob(job.id)
+    expect(store.savedJobs.some((entry) => entry.id === job.id)).toBe(false)
+    expect(store.isJobSaved(job.id)).toBe(false)
+    expect(store.savedJobsCount).toBe(4)
+
+    store.toggleSavedJob(job)
+    expect(store.isJobSaved(job.id)).toBe(true)
+  })
+
   it('applies for a job and creates a notification', () => {
     const store = useJobhuntStore()
     const job = jobs[0]
 
+    expect(store.isJobApplied(job.id)).toBe(false)
     store.applyForJob(job)
 
     expect(store.applications[0]).toMatchObject({
+      jobId: job.id,
       role: job.title,
       company: job.company,
-      status: 'Under review',
+      status: 'Applied',
     })
+    expect(store.isJobApplied(job.id)).toBe(true)
     expect(store.notifications[0].message).toContain(job.title)
+
+    store.applyForJob(job)
+    expect(store.applications.filter((application) => application.jobId === job.id)).toHaveLength(1)
+    expect(
+      store.notifications.filter((notification) => notification.message.includes(job.title)),
+    ).toHaveLength(1)
   })
 
   it('reflects the applied job in the dashboard overview state', () => {
@@ -83,9 +166,10 @@ describe('jobhunt store', () => {
     store.applyForJob(job)
 
     expect(store.applications[0]).toMatchObject({
+      jobId: job.id,
       role: job.title,
       company: job.company,
-      status: 'Under review',
+      status: 'Applied',
     })
     expect(store.recentApplications[0].role).toBe(job.title)
     expect(store.overviewStats[0].value).toBe(store.applications.length)

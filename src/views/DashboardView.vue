@@ -26,6 +26,8 @@
               <div class="profile-name">
                 <p>{{ userProfile.name }}</p>
                 <span class="job-status">{{ userProfile.role }}</span>
+              </div>
+              <div class="signout">
                 <button type="button" class="sign-out-btn" @click="signOut">Sign out</button>
               </div>
             </div>
@@ -104,15 +106,15 @@
                       </tr>
                     </thead>
                     <tbody v-if="notifications.length">
-                      <tr v-for="notification in notifications" :key="notification.id">
+                      <tr v-for="notification in paginatedNotifications" :key="notification.id">
                         <td class="notiv" scope="row">
                           <div class="status-icon">
                             <svg
                               v-if="notification.type === 'success'"
                               xmlns="http://www.w3.org/2000/svg"
-                              height="24px"
+                              height="18px"
                               viewBox="0 -960 960 960"
-                              width="24px"
+                              width="18px"
                               fill="#75FB4C"
                             >
                               <path
@@ -122,9 +124,9 @@
                             <svg
                               v-else
                               xmlns="http://www.w3.org/2000/svg"
-                              height="24px"
+                              height="18px"
                               viewBox="0 -960 960 960"
-                              width="24px"
+                              width="18px"
                               fill="#F19E39"
                             >
                               <path
@@ -174,6 +176,27 @@
                       </tr>
                     </tbody>
                   </table>
+                  <nav
+                    v-if="notificationPageCount > 1"
+                    class="dashboard-pagination notification-pagination"
+                    aria-label="Notification pages"
+                  >
+                    <button
+                      type="button"
+                      :disabled="currentNotificationPage === 1"
+                      @click="previousNotificationsPage"
+                    >
+                      Previous
+                    </button>
+                    <span>Page {{ currentNotificationPage }} of {{ notificationPageCount }}</span>
+                    <button
+                      type="button"
+                      :disabled="currentNotificationPage === notificationPageCount"
+                      @click="nextNotificationsPage"
+                    >
+                      Next
+                    </button>
+                  </nav>
                 </div>
               </div>
             </div>
@@ -185,7 +208,7 @@
           >
             <div class="app-head">
               <h3>Applications</h3>
-              <p>{{ applications.length }} applications sent across 4 stages.</p>
+              <p>{{ applications.length }} applications sent.</p>
             </div>
             <div class="app-content">
               <ul class="application-filters" aria-label="Filter applications">
@@ -213,7 +236,7 @@
                   </thead>
                   <tbody>
                     <tr
-                      v-for="application in filteredApplications"
+                      v-for="application in paginatedApplications"
                       :key="application.role + application.company"
                     >
                       <td scope="row">{{ application.role }}</td>
@@ -231,6 +254,27 @@
                   </tbody>
                 </table>
               </div>
+              <nav
+                v-if="applicationPageCount > 1"
+                class="dashboard-pagination"
+                aria-label="Application results pages"
+              >
+                <button
+                  type="button"
+                  :disabled="currentApplicationPage === 1"
+                  @click="previousApplicationsPage"
+                >
+                  Previous
+                </button>
+                <span>Page {{ currentApplicationPage }} of {{ applicationPageCount }}</span>
+                <button
+                  type="button"
+                  :disabled="currentApplicationPage === applicationPageCount"
+                  @click="nextApplicationsPage"
+                >
+                  Next
+                </button>
+              </nav>
             </div>
           </div>
 
@@ -240,24 +284,41 @@
           >
             <div class="savedjobs-head">
               <h3>Saved jobs</h3>
-              <p>{{ savedJobs.filter((job) => job.saved).length }} roles saved for later.</p>
+              <p>{{ savedJobs.length }} roles saved for later.</p>
             </div>
-            <div class="savedjobs-content">
-              <div v-for="job in savedJobs" :key="job.id" class="savedjob-tiles">
+            <div v-if="savedJobs.length" class="savedjobs-content">
+              <div v-for="job in paginatedSavedJobs" :key="job.id" class="savedjob-tiles">
                 <div class="company-initials">{{ job.initials }}</div>
                 <div class="job-title">{{ job.title }}</div>
                 <div class="job-location">{{ job.location }}</div>
                 <div class="job-pay">{{ job.pay }}</div>
-                <button
-                  type="button"
-                  class="save-toggle"
-                  :class="{ saved: job.saved }"
-                  @click="handleSavedJobToggle(job.id)"
-                >
-                  {{ job.saved ? 'Saved' : 'Save' }}
+                <button type="button" class="save-toggle" @click="handleSavedJobRemove(job.id)">
+                  Remove
                 </button>
               </div>
             </div>
+            <nav
+              v-if="savedJobPageCount > 1"
+              class="dashboard-pagination"
+              aria-label="Saved job results pages"
+            >
+              <button
+                type="button"
+                :disabled="currentSavedJobsPage === 1"
+                @click="previousSavedJobsPage"
+              >
+                Previous
+              </button>
+              <span>Page {{ currentSavedJobsPage }} of {{ savedJobPageCount }}</span>
+              <button
+                type="button"
+                :disabled="currentSavedJobsPage === savedJobPageCount"
+                @click="nextSavedJobsPage"
+              >
+                Next
+              </button>
+            </nav>
+            <p v-if="!savedJobs.length" class="savedjobs-empty">No saved jobs yet.</p>
           </div>
 
           <div
@@ -321,30 +382,206 @@
               <p>How employers see you.</p>
             </div>
             <div class="profile-content">
-              <div class="part1">
-                <div class="profile-ini">AO</div>
-                <div class="profile-detail">
-                  <h4>{{ userProfile.name }}</h4>
-                  <span class="updated-specialization"
-                    >{{ userProfile.skill }} · <span>{{ userProfile.location }}</span></span
-                  >
+              <div class="profile-read-view">
+                <div class="profile-summary">
+                  <div class="profile-ini">{{ profileInitials }}</div>
+                  <div class="profile-summary-copy">
+                    <h4>{{ userProfile.name || 'Your name' }}</h4>
+                    <p>{{ userProfile.role || 'Add your target role' }}</p>
+                  </div>
+                  <button type="button" class="profile-edit-button" @click="startProfileEdit">
+                    Edit profile
+                  </button>
                 </div>
+
+                <dl class="profile-details">
+                  <div class="profile-detail-item">
+                    <dt>Email</dt>
+                    <dd>{{ userProfile.email || 'Not added yet' }}</dd>
+                  </div>
+                  <div class="profile-detail-item">
+                    <dt>Location</dt>
+                    <dd>{{ userProfile.location || 'Not added yet' }}</dd>
+                  </div>
+                  <div class="profile-detail-item">
+                    <dt>Phone</dt>
+                    <dd>{{ userProfile.phoneNumber || 'Not added yet' }}</dd>
+                  </div>
+                  <div class="profile-detail-item">
+                    <dt>Date of birth</dt>
+                    <dd>{{ userProfile.birthDate || 'Not added yet' }}</dd>
+                  </div>
+                  <div class="profile-detail-item">
+                    <dt>LinkedIn</dt>
+                    <dd>
+                      <a
+                        v-if="userProfile.linkedinUrl"
+                        :href="userProfile.linkedinUrl"
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {{ userProfile.linkedinUrl }}
+                      </a>
+                      <span v-else>Not added yet</span>
+                    </dd>
+                  </div>
+                  <div class="profile-detail-item">
+                    <dt>Resume</dt>
+                    <dd>{{ userProfile.resumeName || 'No resume selected' }}</dd>
+                  </div>
+                  <div class="profile-detail-item profile-about-item">
+                    <dt>About</dt>
+                    <dd>{{ userProfile.about || 'Add a short introduction about yourself.' }}</dd>
+                  </div>
+                </dl>
+
+                <section class="profile-skills" aria-labelledby="profile-skills-title">
+                  <h4 id="profile-skills-title">Skills</h4>
+                  <ul v-if="selectedSkills.length">
+                    <li v-for="skill in selectedSkills" :key="skill.id">{{ skill.name }}</li>
+                  </ul>
+                  <p v-else>No skills added yet.</p>
+                </section>
               </div>
-              <div class="part2" id="specialization">
-                <ul>
-                  <li
-                    v-for="skill in skills"
-                    :key="skill.id"
-                    :class="{ selected: skill.selected }"
-                    @click="toggleSkill(skill.id)"
-                  >
-                    {{ skill.name }}
-                  </li>
-                </ul>
-              </div>
-              <div class="part3">
-                <Fileupload />
-              </div>
+
+              <dialog
+                ref="profileEditDialog"
+                class="profile-edit-dialog"
+                aria-labelledby="profile-edit-title"
+                @cancel.prevent="cancelProfileEdit"
+                @close="resetProfileEditDraft"
+              >
+                <form
+                  class="profile-edit-form"
+                  @submit.prevent="saveProfile"
+                  @keydown.esc.prevent="cancelProfileEdit"
+                >
+                  <div class="profile-form-heading">
+                    <div>
+                      <h4 id="profile-edit-title">Edit profile</h4>
+                      <p>Update the details shown to employers.</p>
+                    </div>
+                    <button type="button" class="profile-cancel-button" @click="cancelProfileEdit">
+                      Cancel
+                    </button>
+                  </div>
+
+                  <div class="profile-form-grid">
+                    <label class="profile-field">
+                      <span>Full name</span>
+                      <input
+                        v-model.trim="profileDraft.name"
+                        type="text"
+                        autocomplete="name"
+                        required
+                      />
+                    </label>
+                    <label class="profile-field">
+                      <span>Email</span>
+                      <input
+                        :value="userProfile.email"
+                        type="email"
+                        autocomplete="email"
+                        readonly
+                      />
+                    </label>
+                    <div class="profile-field-group">
+                      <label class="profile-field">
+                        <span>Target role</span>
+                        <input
+                          v-model.trim="profileDraft.role"
+                          type="text"
+                          autocomplete="organization-title"
+                        />
+                      </label>
+                      <div class="profile-suggestions" aria-label="Suggested target roles">
+                        <button
+                          v-for="role in roleSuggestions"
+                          :key="role"
+                          type="button"
+                          class="profile-suggestion"
+                          :class="{ selected: profileDraft.role === role }"
+                          @click="profileDraft.role = role"
+                        >
+                          {{ role }}
+                        </button>
+                      </div>
+                    </div>
+                    <label class="profile-field">
+                      <span>Location</span>
+                      <input
+                        v-model.trim="profileDraft.location"
+                        type="text"
+                        autocomplete="address-level2"
+                      />
+                    </label>
+                    <label class="profile-field">
+                      <span>Phone</span>
+                      <input
+                        v-model.trim="profileDraft.phoneNumber"
+                        type="tel"
+                        autocomplete="tel"
+                      />
+                    </label>
+                    <label class="profile-field">
+                      <span>Date of birth</span>
+                      <input v-model="profileDraft.birthDate" type="date" />
+                    </label>
+                    <label class="profile-field profile-field-wide">
+                      <span>LinkedIn profile URL</span>
+                      <input
+                        v-model.trim="profileDraft.linkedinUrl"
+                        type="url"
+                        autocomplete="url"
+                        placeholder="https://www.linkedin.com/in/your-name"
+                      />
+                    </label>
+                    <label class="profile-field profile-field-wide">
+                      <span>About</span>
+                      <textarea
+                        v-model.trim="profileDraft.about"
+                        rows="4"
+                        maxlength="600"
+                      ></textarea>
+                    </label>
+                    <div class="profile-field-group profile-field-wide">
+                      <label class="profile-field">
+                        <span>Skills, separated by commas</span>
+                        <input
+                          v-model="profileSkillsDraft"
+                          type="text"
+                          placeholder="Product design, Figma, Research"
+                        />
+                      </label>
+                      <div class="profile-suggestions" aria-label="Suggested skills">
+                        <button
+                          v-for="skill in profileSkillSuggestions"
+                          :key="skill"
+                          type="button"
+                          class="profile-suggestion"
+                          :class="{ selected: selectedProfileSkillNames.has(skill.toLowerCase()) }"
+                          @click="toggleProfileSkillSuggestion(skill)"
+                        >
+                          {{ skill }}
+                        </button>
+                      </div>
+                    </div>
+                    <label class="profile-field profile-field-wide">
+                      <span>Resume</span>
+                      <input
+                        type="file"
+                        accept=".pdf,.doc,.docx"
+                        @change="handleResumeFileChange"
+                      />
+                      <small>{{ profileDraft.resumeName || 'No resume selected' }}</small>
+                    </label>
+                  </div>
+
+                  <div class="profile-form-actions">
+                    <button type="submit" class="profile-save-button">Save profile</button>
+                  </div>
+                </form>
+              </dialog>
             </div>
           </div>
 
@@ -410,15 +647,16 @@
         </div>
       </div>
     </div>
-    <Footer />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import HeaderB from '../components/HeaderB.vue'
+import { jobs } from '../data/jobs'
 import { useJobhuntStore } from '../stores/jobhunt'
+import type { UserProfile } from '../types/store'
 
 const store = useJobhuntStore()
 const router = useRouter()
@@ -436,30 +674,85 @@ const mainTabs: { id: DashboardTab; label: string }[] = [
 
 const activeTab = computed(() => store.activeTab as DashboardTab)
 const activeApplicationFilter = computed(() => store.activeApplicationFilter)
+const currentApplicationPage = ref(1)
+const currentSavedJobsPage = ref(1)
+const currentNotificationPage = ref(1)
+const profileEditDialog = ref<HTMLDialogElement | null>(null)
+const profileDraft = ref<UserProfile>({ ...store.userProfile })
+const profileSkillsDraft = ref('')
+const profileSkillSuggestions = [
+  'UX design',
+  'Figma',
+  'User research',
+  'Product strategy',
+  'Data analysis',
+  'Quality assurance',
+  'Cloud infrastructure',
+  'Cybersecurity',
+]
+const applicationsPerPage = 4
+const savedJobsPerPage = 4
+const notificationsPerPage = 2
 const activeMessageId = computed(() => store.activeMessageId)
 const replyStatus = computed(() => store.replyStatus)
 const applications = computed(() => store.applications)
-const savedJobs = computed(() => store.savedJobs)
+const savedJobs = computed(() => store.savedJobs.filter((job) => job.saved))
 const inboxMessages = computed(() => store.inboxMessages)
 const notifications = computed(() => store.notifications)
 const settings = computed(() => store.settings)
 const skills = computed(() => store.skills)
+const selectedSkills = computed(() => skills.value.filter((skill) => skill.selected))
+const roleSuggestions = computed(() => [...new Set(jobs.map((job) => job.title))].slice(0, 6))
+const selectedProfileSkillNames = computed(
+  () => new Set(profileSkillsDraft.value.split(',').map((name) => name.trim().toLowerCase())),
+)
 const overviewStats = computed(() => store.overviewStats)
 const recentApplications = computed(() => store.recentApplications)
 const applicationFilters = computed(
   () =>
     store.applicationFilters as Array<{
-      id: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected'
+      id: 'all' | 'applied' | 'interview' | 'under-review' | 'offer' | 'not-selected'
       label: string
       count: number
     }>,
 )
 const filteredApplications = computed(() => store.filteredApplications)
+const applicationPageCount = computed(() =>
+  Math.max(1, Math.ceil(filteredApplications.value.length / applicationsPerPage)),
+)
+const paginatedApplications = computed(() => {
+  const start = (currentApplicationPage.value - 1) * applicationsPerPage
+  return filteredApplications.value.slice(start, start + applicationsPerPage)
+})
+const savedJobPageCount = computed(() =>
+  Math.max(1, Math.ceil(savedJobs.value.length / savedJobsPerPage)),
+)
+const paginatedSavedJobs = computed(() => {
+  const start = (currentSavedJobsPage.value - 1) * savedJobsPerPage
+  return savedJobs.value.slice(start, start + savedJobsPerPage)
+})
+const notificationPageCount = computed(() =>
+  Math.max(1, Math.ceil(notifications.value.length / notificationsPerPage)),
+)
+const paginatedNotifications = computed(() => {
+  const start = (currentNotificationPage.value - 1) * notificationsPerPage
+  return notifications.value.slice(start, start + notificationsPerPage)
+})
 const selectedMessage = computed(() => store.selectedMessage)
 const unreadMessageCount = computed(() => store.unreadMessageCount)
 const allNotificationsRead = computed(() => store.allNotificationsRead)
 const userProfile = computed(() => store.userProfile)
 const profileInitials = computed(() => userProfile.value.initials || 'AO')
+
+watch(applicationPageCount, (pageCount) => {
+  if (currentApplicationPage.value > pageCount) currentApplicationPage.value = pageCount
+})
+watch(savedJobPageCount, (pageCount) => {
+  if (currentSavedJobsPage.value > pageCount) currentSavedJobsPage.value = pageCount
+})
+watch(notificationPageCount, (pageCount) => {
+  if (currentNotificationPage.value > pageCount) currentNotificationPage.value = pageCount
+})
 
 function setActiveTab(tab: DashboardTab) {
   store.setActiveTab(tab)
@@ -467,16 +760,88 @@ function setActiveTab(tab: DashboardTab) {
 function handleTabSelect(tab: DashboardTab) {
   setActiveTab(tab)
 }
-function handleSavedJobToggle(jobId: number) {
-  store.toggleSavedJob(jobId)
+function handleSavedJobRemove(jobId: number) {
+  store.removeSavedJob(jobId)
 }
 function handleSettingsUpdate() {
   store.updateSettings(settings.value)
 }
+function startProfileEdit() {
+  profileDraft.value = { ...userProfile.value }
+  profileSkillsDraft.value = selectedSkills.value.map((skill) => skill.name).join(', ')
+  profileEditDialog.value?.showModal()
+}
+function cancelProfileEdit() {
+  profileEditDialog.value?.close()
+}
+function resetProfileEditDraft() {
+  profileDraft.value = { ...userProfile.value }
+  profileSkillsDraft.value = selectedSkills.value.map((skill) => skill.name).join(', ')
+}
+function toggleProfileSkillSuggestion(skill: string) {
+  const names = profileSkillsDraft.value
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+  const selectedIndex = names.findIndex((name) => name.toLowerCase() === skill.toLowerCase())
+
+  if (selectedIndex >= 0) names.splice(selectedIndex, 1)
+  else names.push(skill)
+
+  profileSkillsDraft.value = names.join(', ')
+}
+function handleResumeFileChange(event: Event) {
+  const input = event.target as HTMLInputElement
+  const file = input.files?.[0]
+  if (file) profileDraft.value.resumeName = file.name
+}
+function saveProfile() {
+  const skillNames = profileSkillsDraft.value
+    .split(',')
+    .map((name) => name.trim())
+    .filter(Boolean)
+  store.updateUserProfile({
+    ...profileDraft.value,
+    name: profileDraft.value.name.trim(),
+    role: profileDraft.value.role.trim(),
+    location: profileDraft.value.location.trim(),
+    phoneNumber: profileDraft.value.phoneNumber.trim(),
+    about: profileDraft.value.about.trim(),
+    linkedinUrl: profileDraft.value.linkedinUrl.trim(),
+    skill: skillNames.join(', '),
+  })
+  store.updateProfileSkills(skillNames)
+  profileEditDialog.value?.close()
+}
 function toggleApplicationFilter(
-  filter: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected',
+  filter: 'all' | 'applied' | 'interview' | 'under-review' | 'offer' | 'not-selected',
 ) {
+  currentApplicationPage.value = 1
   store.toggleApplicationFilter(filter)
+}
+function previousApplicationsPage() {
+  if (currentApplicationPage.value > 1) currentApplicationPage.value -= 1
+}
+function nextApplicationsPage() {
+  if (currentApplicationPage.value < applicationPageCount.value) {
+    currentApplicationPage.value += 1
+  }
+}
+function previousSavedJobsPage() {
+  if (currentSavedJobsPage.value > 1) currentSavedJobsPage.value -= 1
+}
+function nextSavedJobsPage() {
+  if (currentSavedJobsPage.value < savedJobPageCount.value) {
+    currentSavedJobsPage.value += 1
+  }
+}
+function previousNotificationsPage() {
+  if (currentNotificationPage.value > 1) currentNotificationPage.value -= 1
+}
+function nextNotificationsPage() {
+  if (currentNotificationPage.value < notificationPageCount.value) {
+    currentNotificationPage.value += 1
+  }
 }
 function toggleNotificationRead(id: number) {
   store.toggleNotificationRead(id)
@@ -486,9 +851,6 @@ function markAllNotificationsRead() {
 }
 function replyToMessage() {
   store.replyToMessage()
-}
-function toggleSkill(id: number) {
-  store.toggleSkill(id)
 }
 function selectMessage(id: number) {
   store.selectMessage(id)
@@ -547,7 +909,7 @@ body {
   background: linear-gradient(180deg, #f8fbff 0%, #f2f7fb 100%);
   margin-top: -80px;
   min-height: calc(100vh - 80px);
-  padding-top: 90px;
+  padding-top: 80px;
 }
 
 .sectionA > .d-flex {
@@ -562,11 +924,13 @@ body {
   flex-direction: column;
   justify-content: space-between;
   align-items: flex-start;
-  position: sticky;
-  top: 61px;
+  position: relative;
+  top: 0;
   width: 240px;
   min-width: 240px;
-  height: calc(100vh - 110px);
+  height: calc(100vh - 64px);
+  height: calc(100dvh - 64px);
+  height: 100%;
   gap: 10px;
   padding: 18px 14px 18px 14px;
   margin: 0;
@@ -748,6 +1112,11 @@ body {
   font-size: 0.94rem;
 }
 
+.overview-content .partC1 tbody td {
+  padding-top: 13px;
+  padding-bottom: 13px;
+}
+
 .overview-content .partC tbody td.empty-notifications {
   padding: 20px 16px;
   text-align: center;
@@ -779,20 +1148,44 @@ body {
 
 .overview-content .partC .notiv {
   display: flex;
-  gap: 14px;
+  gap: 10px;
   align-items: center;
   width: 100%;
-  padding: 12px 16px;
+  padding: 10px 14px;
 }
 
 .status-icon {
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 34px;
-  height: 34px;
+  flex: 0 0 30px;
+  width: 30px;
+  height: 30px;
   border-radius: 10px;
   background: rgba(20, 134, 195, 0.08);
+}
+
+.status-icon svg {
+  width: 18px;
+  height: 18px;
+}
+
+.noti-message {
+  min-width: 0;
+}
+
+.noti-message p {
+  margin: 0 0 3px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+}
+
+.noti-message span {
+  font-size: 0.72rem;
+}
+
+.notification-pagination {
+  padding: 0 14px 14px;
 }
 
 .t1 {
@@ -837,7 +1230,7 @@ body {
 .nav-footer .profile-name p {
   margin: 0;
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #d2efff;
 }
 
@@ -982,6 +1375,37 @@ body {
   font-weight: 650;
 }
 
+.dashboard-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 14px;
+  color: rgba(15, 23, 42, 0.68);
+  font-size: 0.88rem;
+}
+
+.dashboard-pagination button {
+  min-height: 36px;
+  padding: 7px 12px;
+  border: 1px solid rgba(7, 26, 41, 0.14);
+  border-radius: 6px;
+  background: #fff;
+  color: #071a29;
+  font: inherit;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.dashboard-pagination button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.savedjobs-content .dashboard-pagination {
+  grid-column: 1 / -1;
+}
+
 .application-status {
   display: inline-flex;
   align-items: center;
@@ -997,6 +1421,11 @@ body {
 .status-offer {
   background: #e7f5ee;
   color: #18734a;
+}
+
+.status-applied {
+  background: #e5f5fb;
+  color: #075985;
 }
 
 .status-under-review {
@@ -1141,19 +1570,18 @@ body {
 }
 
 .savedjobs-content {
-  display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 20px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 16px;
 }
 
 .savedjob-tiles {
-  width: calc(50% - 10px);
-  min-width: 240px;
+  width: auto;
+  min-width: 0;
   border: 1px solid rgba(7, 26, 41, 0.08);
-  padding: 18px 18px 16px;
-  border-radius: 20px;
+  padding: 14px;
+  border-radius: 14px;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.96) 0%, rgba(242, 247, 251, 0.96) 100%);
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.04);
 }
@@ -1164,21 +1592,22 @@ body {
   font-weight: 800;
   font-size: 1.05rem;
   width: fit-content;
-  padding: 12px 14px;
-  border-radius: 12px;
-  margin-bottom: 12px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  margin-bottom: 8px;
 }
 
 .job-title {
   font-weight: 700;
   color: #071a29;
-  margin-bottom: 8px;
+  margin-bottom: 4px;
 }
 
 .job-location,
 .job-pay {
   color: rgba(15, 23, 42, 0.7);
-  margin-bottom: 8px;
+  margin-bottom: 4px;
+  font-size: 0.9rem;
 }
 
 .message-section {
@@ -1247,59 +1676,281 @@ body {
 
 .profile-section .profile-content {
   border: 1px solid rgba(7, 26, 41, 0.08);
-  padding: 18px 20px;
-  border-radius: 20px;
+  padding: 24px;
+  border-radius: 14px;
   background: rgba(255, 255, 255, 0.85);
   box-shadow: 0 14px 28px rgba(15, 23, 42, 0.04);
 }
 
-.profile-section .profile-content .part1 {
+.profile-summary {
   display: flex;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   align-items: center;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
-.profile-section .profile-content .profile-ini {
+.profile-ini {
+  display: grid;
+  flex: 0 0 52px;
+  place-items: center;
   background: linear-gradient(135deg, #ffc857 0%, #ff9f1c 100%);
-  width: 56px;
-  height: 56px;
+  width: 52px;
+  height: 52px;
   font-weight: 800;
   font-size: 1.1rem;
   border-radius: 50%;
-  text-align: center;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   box-shadow: 0 10px 22px rgba(255, 159, 28, 0.25);
 }
 
-.profile-section .profile-content .profile-detail h4 {
-  margin: 0 0 6px;
+.profile-summary-copy {
+  min-width: 0;
+  flex: 1;
 }
 
-.profile-section .profile-content .updated-specialization {
-  color: rgba(15, 23, 42, 0.7);
+.profile-summary-copy h4,
+.profile-form-heading h4 {
+  margin: 0;
+  color: #071a29;
 }
 
-.profile-section .profile-content .part2 ul {
+.profile-summary-copy p,
+.profile-form-heading p {
+  margin: 5px 0 0;
+  color: rgba(15, 23, 42, 0.65);
+}
+
+.profile-edit-button,
+.profile-cancel-button,
+.profile-save-button {
+  min-height: 38px;
+  padding: 8px 14px;
+  border: 1px solid rgba(20, 134, 195, 0.25);
+  border-radius: 6px;
+  background: #fff;
+  color: #075985;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.profile-save-button {
+  border-color: #071a29;
+  background: #071a29;
+  color: #fff;
+}
+
+.profile-edit-button:focus-visible,
+.profile-cancel-button:focus-visible,
+.profile-save-button:focus-visible,
+.profile-field input:focus-visible,
+.profile-field textarea:focus-visible {
+  outline: 2px solid #1486c3;
+  outline-offset: 2px;
+}
+
+.profile-details {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 24px;
+  margin: 0;
+}
+
+.profile-detail-item {
+  min-width: 0;
+  padding: 13px 0;
+  border-bottom: 1px solid rgba(7, 26, 41, 0.08);
+}
+
+.profile-detail-item dt {
+  color: rgba(15, 23, 42, 0.58);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.profile-detail-item dd {
+  margin: 5px 0 0;
+  overflow-wrap: anywhere;
+  color: #0f172a;
+  line-height: 1.5;
+}
+
+.profile-detail-item a {
+  color: #075985;
+}
+
+.profile-about-item {
+  grid-column: 1 / -1;
+}
+
+.profile-skills {
+  margin-top: 20px;
+}
+
+.profile-skills h4 {
+  margin: 0;
+  color: #071a29;
+  font-size: 1rem;
+}
+
+.profile-skills ul {
   display: flex;
-  flex-direction: row;
-  gap: 14px;
-  list-style: none;
   flex-wrap: wrap;
-  padding-left: 0;
-  margin: 18px 0;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
 }
 
-.profile-section .profile-content .part2 li {
+.profile-skills li {
   font-weight: 600;
   font-size: 0.8rem;
-  padding: 8px 14px;
-  background: linear-gradient(180deg, #edf7ff 0%, #dfeefb 100%);
-  border-radius: 999px;
+  padding: 7px 11px;
+  background: #e8f5fb;
+  border-radius: 6px;
   color: #0f172a;
+}
+
+.profile-skills > p {
+  margin: 8px 0 0;
+  color: rgba(15, 23, 42, 0.62);
+}
+
+.profile-edit-dialog {
+  width: min(760px, calc(100% - 24px));
+  max-width: none;
+  max-height: min(90dvh, 820px);
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(7, 26, 41, 0.12);
+  border-radius: 12px;
+  background: #f9fcff;
+  color: #0f172a;
+  box-shadow: 0 24px 70px rgba(1, 16, 28, 0.3);
+}
+
+.profile-edit-dialog::backdrop {
+  background: rgba(1, 16, 28, 0.68);
+  backdrop-filter: blur(3px);
+}
+
+.profile-edit-form {
+  padding: 24px;
+}
+
+.profile-form-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.profile-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px 20px;
+}
+
+.profile-field {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 7px;
+  color: #263746;
+  font-size: 0.88rem;
+  font-weight: 650;
+}
+
+.profile-field-wide {
+  grid-column: 1 / -1;
+}
+
+.profile-field-group {
+  min-width: 0;
+}
+
+.profile-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.profile-suggestion {
+  max-width: 100%;
+  padding: 5px 9px;
+  border: 1px solid rgba(7, 26, 41, 0.12);
+  border-radius: 999px;
+  background: #fff;
+  color: #334155;
+  font: inherit;
+  font-size: 0.74rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+  text-align: left;
+  cursor: pointer;
+}
+
+.profile-suggestion.selected {
+  border-color: rgba(20, 134, 195, 0.36);
+  background: #e8f5fb;
+  color: #075985;
+}
+
+.profile-suggestion:focus-visible {
+  outline: 2px solid #1486c3;
+  outline-offset: 2px;
+}
+
+.profile-field input,
+.profile-field textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid rgba(7, 26, 41, 0.16);
+  border-radius: 6px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  font-weight: 400;
+}
+
+.profile-field input[readonly] {
+  background: #f4f8fb;
+  color: rgba(15, 23, 42, 0.65);
+}
+
+.profile-field input[type='file'] {
+  padding: 8px;
+}
+
+.profile-field input[type='file']::file-selector-button {
+  margin-right: 10px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 4px;
+  background: #e8f5fb;
+  color: #075985;
+  font: inherit;
+  cursor: pointer;
+}
+
+.profile-field textarea {
+  resize: vertical;
+}
+
+.profile-field small {
+  color: rgba(15, 23, 42, 0.62);
+  font-weight: 400;
+  overflow-wrap: anywhere;
+}
+
+.profile-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 22px;
 }
 
 .settings-section {
@@ -1387,6 +2038,10 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
+.nav-footer {
+  margin-top: 170px;
+}
+
 @media (max-width: 1100px) {
   .overview-content .partB {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1399,17 +2054,20 @@ input:checked + .slider:before {
 
 @media (max-width: 768px) {
   .sectionA {
-    padding-top: 70px;
+    padding-top: 80px;
   }
 
   .sectionA > .d-flex {
     flex-direction: column;
     align-items: stretch;
+    padding-left: 0;
   }
 
   .sectionA .navbar {
     position: relative;
     top: 0;
+    left: auto;
+    z-index: auto;
     width: 100%;
     min-width: 100%;
     height: auto;
@@ -1431,6 +2089,10 @@ input:checked + .slider:before {
     width: 100%;
   }
 
+  .profile-section {
+    padding: 10px 14px;
+  }
+
   .app-section {
     padding: 10px 14px;
   }
@@ -1441,6 +2103,10 @@ input:checked + .slider:before {
 
   .savedjob-tiles {
     width: 100%;
+  }
+
+  .savedjobs-content {
+    grid-template-columns: minmax(0, 1fr);
   }
 
   .message-layout {
@@ -1468,6 +2134,41 @@ input:checked + .slider:before {
 
   .app-head h3 {
     font-size: 1.4rem;
+  }
+
+  .profile-section {
+    padding: 8px 10px;
+  }
+
+  .profile-edit-dialog {
+    width: calc(100% - 24px);
+    max-height: calc(100dvh - 24px);
+  }
+
+  .profile-edit-form {
+    padding: 18px;
+  }
+
+  .profile-details,
+  .profile-form-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .profile-about-item,
+  .profile-field-wide {
+    grid-column: auto;
+  }
+
+  .profile-form-heading {
+    flex-direction: column;
+  }
+
+  .profile-cancel-button {
+    align-self: flex-start;
+  }
+
+  .dashboard-pagination {
+    justify-content: space-between;
   }
 
   .overview-header {

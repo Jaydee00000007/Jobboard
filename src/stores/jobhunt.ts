@@ -38,8 +38,13 @@ export const useJobhuntStore = defineStore(
         : '',
       role: '',
       location: '',
+      phoneNumber: '',
       email: session?.email || '',
       skill: '',
+      about: '',
+      birthDate: '',
+      linkedinUrl: '',
+      resumeName: '',
     })
 
     const applications = ref<Application[]>([
@@ -163,7 +168,7 @@ export const useJobhuntStore = defineStore(
       'overview' | 'applications' | 'savedjobs' | 'messages' | 'profile' | 'settings'
     >('overview')
     const activeApplicationFilter = ref<
-      'all' | 'interview' | 'under-review' | 'offer' | 'not-selected'
+      'all' | 'applied' | 'interview' | 'under-review' | 'offer' | 'not-selected'
     >('all')
     const activeMessageId = ref(1)
     const replyStatus = ref('')
@@ -199,6 +204,11 @@ export const useJobhuntStore = defineStore(
     const applicationFilters = computed(() => [
       { id: 'all', label: 'All', count: applications.value.length },
       {
+        id: 'applied',
+        label: 'Applied',
+        count: applications.value.filter((item) => item.status === 'Applied').length,
+      },
+      {
         id: 'interview',
         label: 'Interview',
         count: applications.value.filter((item) => item.status === 'Interview').length,
@@ -226,11 +236,15 @@ export const useJobhuntStore = defineStore(
       if (filter === 'all') return applications.value
 
       const statusMap = {
+        applied: 'Applied',
         interview: 'Interview',
         'under-review': 'Under review',
         offer: 'Offer',
         'not-selected': 'Not selected',
-      } satisfies Record<'interview' | 'under-review' | 'offer' | 'not-selected', ApplicationStatus>
+      } satisfies Record<
+        'applied' | 'interview' | 'under-review' | 'offer' | 'not-selected',
+        ApplicationStatus
+      >
 
       return applications.value.filter((item) => item.status === statusMap[filter])
     })
@@ -260,6 +274,10 @@ export const useJobhuntStore = defineStore(
       return savedJobs.value.some((job) => job.id === jobId && job.saved)
     }
 
+    function isJobApplied(jobId: number) {
+      return applications.value.some((application) => application.jobId === jobId)
+    }
+
     function toggleSavedJob(job: Job | number) {
       const jobId = typeof job === 'object' ? job.id : job
       const existingJob = savedJobs.value.find((entry) => entry.id === jobId)
@@ -277,6 +295,10 @@ export const useJobhuntStore = defineStore(
           saved: true,
         })
       }
+    }
+
+    function removeSavedJob(jobId: number) {
+      savedJobs.value = savedJobs.value.filter((job) => job.id !== jobId)
     }
 
     function toggleNotificationRead(id: number) {
@@ -297,24 +319,64 @@ export const useJobhuntStore = defineStore(
         skill.id === id ? { ...skill, selected: !skill.selected } : skill,
       )
     }
+    function updateUserProfile(profile: Partial<UserProfile>) {
+      const name = profile.name?.trim() ?? userProfile.value.name
+      const initials = name
+        .split(' ')
+        .filter(Boolean)
+        .slice(0, 2)
+        .map((part) => part[0])
+        .join('')
+        .toUpperCase()
+      userProfile.value = { ...userProfile.value, ...profile, name, initials }
+    }
+    function updateProfileSkills(names: string[]) {
+      const uniqueNames = [...new Set(names.map((name) => name.trim()).filter(Boolean))]
+      skills.value = uniqueNames.map((name, index) => ({ id: index + 1, name, selected: true }))
+      userProfile.value.skill = uniqueNames.join(', ')
+    }
     function updateSettings(partialSettings: Partial<Settings>) {
       settings.value = { ...settings.value, ...partialSettings }
     }
 
     function authenticate(account: AuthSession) {
-      const name = account.name || userProfile.value.name
+      const accountEmail = account.email.trim().toLowerCase()
+      const sameAccount = userProfile.value.email.trim().toLowerCase() === accountEmail
+      const existingProfile = userProfile.value
+      const name = sameAccount ? existingProfile.name || account.name || '' : account.name || ''
       const initials = name
         .split(' ')
         .map((part) => part[0])
         .slice(0, 2)
         .join('')
         .toUpperCase()
+      const emptyProfile: UserProfile = {
+        name: '',
+        initials: '',
+        role: '',
+        location: '',
+        phoneNumber: '',
+        email: '',
+        skill: '',
+        about: '',
+        birthDate: '',
+        linkedinUrl: '',
+        resumeName: '',
+      }
       userProfile.value = {
-        ...userProfile.value,
+        ...(sameAccount ? existingProfile : emptyProfile),
         name,
         initials,
-        email: account.email,
-        skill: account.skill || userProfile.value.skill,
+        email: accountEmail,
+        skill: sameAccount ? existingProfile.skill : account.skill || '',
+      }
+      if (!sameAccount) {
+        skills.value = [
+          { id: 1, name: 'UX design', selected: true },
+          { id: 2, name: 'Branding', selected: true },
+          { id: 3, name: 'Packaging', selected: false },
+          { id: 4, name: 'Figma', selected: true },
+        ]
       }
       isAuthenticated.value = true
       saveAuthSession(account)
@@ -362,10 +424,13 @@ export const useJobhuntStore = defineStore(
     }
 
     function applyForJob(job: Job) {
+      if (isJobApplied(job.id)) return
+
       applications.value.unshift({
+        jobId: job.id,
         role: job.title,
         company: job.company,
-        status: 'Under review',
+        status: 'Applied',
         date: 'Just now',
       })
       notifications.value.unshift({
@@ -387,10 +452,12 @@ export const useJobhuntStore = defineStore(
       filteredApplications,
       inboxMessages,
       isAuthenticated,
+      isJobApplied,
       isJobSaved,
       markAllNotificationsRead,
       notifications,
       overviewStats,
+      removeSavedJob,
       recentApplications,
       replyStatus,
       replyToMessage,
@@ -407,12 +474,14 @@ export const useJobhuntStore = defineStore(
       toggleNotificationRead,
       toggleSavedJob,
       toggleSkill,
+      updateProfileSkills,
       updateSettings,
+      updateUserProfile,
       unreadMessageCount,
       userProfile,
       applyForJob,
       setActiveTab,
     }
   },
-  { persist: { pick: ['userProfile'] } },
+  { persist: { pick: ['userProfile', 'skills'] } },
 )
