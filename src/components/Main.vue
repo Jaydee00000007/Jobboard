@@ -56,7 +56,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import Form from './Form.vue'
 import Login from './Login.vue'
 import { useJobhuntStore } from '../stores/jobhunt'
@@ -65,6 +65,7 @@ const isForm = ref(false)
 const isSubmitting = ref(false)
 const authError = ref('')
 const router = useRouter()
+const route = useRoute()
 const store = useJobhuntStore()
 
 import type { AuthPayload } from '../types/store'
@@ -77,7 +78,8 @@ async function handleSignIn(payload: AuthPayload) {
       authError.value = 'Email or password is incorrect.'
       return
     }
-    await router.push('/dashboard')
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
+    await router.push(redirect)
   } catch {
     authError.value = 'Unable to sign in. Please try again.'
   } finally {
@@ -93,7 +95,8 @@ async function handleSignUp(payload: AuthPayload) {
       authError.value = 'An account with this email already exists.'
       return
     }
-    await router.push('/dashboard')
+    const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : '/dashboard'
+    await router.push(redirect)
   } catch {
     authError.value = 'Unable to create your account. Please try again.'
   } finally {
