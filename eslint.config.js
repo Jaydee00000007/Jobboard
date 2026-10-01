@@ -10,7 +10,7 @@ export default [
   js.configs.recommended,
   ...vue.configs['flat/recommended'],
   {
-    files: ['**/*.{js,vue}'],
+    files: ['**/*.{js,ts,vue}'],
     languageOptions: {
       globals: {
         ...globals.browser,
@@ -24,7 +24,7 @@ export default [
       'vue/multi-word-component-names': 'off',
       'vue/no-reserved-component-names': 'off',
       'vue/no-unused-vars': 'warn',
-      'no-unused-vars': 'warn',
+      'no-unused-vars': 'off'\n      ,'@typescript-eslint/no-unused-vars': 'warn',
       'vue/max-attributes-per-line': 'off',
       'vue/html-indent': 'off',
       'vue/html-self-closing': 'off',
