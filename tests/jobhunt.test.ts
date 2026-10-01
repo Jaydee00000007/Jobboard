@@ -157,27 +157,13 @@ describe('jobhunt store', () => {
     expect(store.isJobSaved(job.id)).toBe(true)
   })
 
-  it('applies for a job and creates a notification', () => {
+  it('does not create a job application when signed out', () => {
     const store = useJobhuntStore()
     const job = jobs[0]
 
     expect(store.isJobApplied(job.id)).toBe(false)
-    store.applyForJob(job)
-
-    expect(store.applications[0]).toMatchObject({
-      jobId: job.id,
-      role: job.title,
-      company: job.company,
-      status: 'Applied',
-    })
-    expect(store.isJobApplied(job.id)).toBe(true)
-    expect(store.notifications[0].message).toContain(job.title)
-
-    store.applyForJob(job)
-    expect(store.applications.filter((application) => application.jobId === job.id)).toHaveLength(1)
-    expect(
-      store.notifications.filter((notification) => notification.message.includes(job.title)),
-    ).toHaveLength(1)
+    expect(store.applyForJob(job)).toBe(false)
+    expect(store.isJobApplied(job.id)).toBe(false)
   })
 
   it('reflects the applied job in the dashboard overview state', () => {
