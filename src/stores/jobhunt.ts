@@ -302,7 +302,9 @@ export const useJobhuntStore = defineStore(
     }
 
     function toggleNotificationRead(id: number) {
-      notifications.value = notifications.value.filter((notification) => notification.id !== id)
+      notifications.value = notifications.value.map((notification) =>
+        notification.id === id ? { ...notification, read: true } : notification,
+      )
     }
 
     function selectMessage(id: number) {
@@ -326,7 +328,10 @@ export const useJobhuntStore = defineStore(
       replyStatus.value = ''
     }
     function markAllNotificationsRead() {
-      notifications.value = []
+      notifications.value = notifications.value.map((notification) => ({
+        ...notification,
+        read: true,
+      }))
     }
     function replyToMessage() {
       const message = selectedMessage.value
