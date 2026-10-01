@@ -33,6 +33,29 @@ describe('jobhunt store', () => {
     expect(store.unreadMessageCount).toBe(2)
   })
 
+  it('marks messages read when opened and deletes only read or replied messages', () => {
+    const store = useJobhuntStore()
+
+    store.selectMessage(1)
+    expect(store.inboxMessages[0].unread).toBe(false)
+    expect(store.unreadMessageCount).toBe(1)
+
+    store.deleteMessage(1)
+    expect(store.inboxMessages.map((message) => message.id)).toEqual([2, 3])
+    expect(store.selectedMessage?.id).toBe(2)
+    expect(store.selectedMessage?.unread).toBe(false)
+
+    store.inboxMessages[0].reply = 'Thanks for the update.'
+    store.deleteMessage(2)
+    expect(store.inboxMessages.map((message) => message.id)).toEqual([3])
+    expect(store.selectedMessage?.id).toBe(3)
+
+    store.deleteMessage(3)
+    expect(store.inboxMessages).toHaveLength(0)
+    expect(store.selectedMessage).toBeUndefined()
+    expect(store.unreadMessageCount).toBe(0)
+  })
+
   it('updates profile details and normalizes the skill list', () => {
     const store = useJobhuntStore()
 

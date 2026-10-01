@@ -78,15 +78,15 @@
         <div class="area2-b">
           <div class="verified-job">
             <span class="first">Product Designer</span>
-            <span class="second">Product Designer</span>
+            <span class="second">Verified today</span>
           </div>
           <div class="verified-job">
-            <span class="first">Product Designer</span>
-            <span class="second">Product Designer</span>
+            <span class="first">Backend Engineer</span>
+            <span class="second">Verified today</span>
           </div>
           <div class="verified-job">
-            <span class="first">Product Designer</span>
-            <span class="second">Product Designer</span>
+            <span class="first">Marketing Lead</span>
+            <span class="second">Verified yesterday</span>
           </div>
         </div>
       </div>
@@ -650,7 +650,14 @@ export default {
   }
 
   .Aboutpage .partD-about .secB .top {
+    display: flex;
     flex-direction: column;
+    padding-top: none;    
+  }
+
+   .Aboutpage .partD-about .secB .messagep {
+   height: 100%;
+    
   }
 }
 </style>

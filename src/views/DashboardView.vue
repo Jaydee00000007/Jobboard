@@ -1,9 +1,26 @@
 <template>
-  <div class="dashboard">
+  <div class="dashboard" :class="{ 'theme-dark': isDarkMode }">
     <HeaderB class="header" />
     <div class="sectionA">
+      <button
+        v-if="mobileSidebarOpen"
+        type="button"
+        class="mobile-sidebar-backdrop"
+        aria-label="Close dashboard menu"
+        @click="closeMobileSidebar"
+      ></button>
+      <button
+        type="button"
+        class="mobile-sidebar-toggle"
+        :aria-expanded="mobileSidebarOpen"
+        aria-controls="dashboard-sidebar"
+        @click="mobileSidebarOpen = !mobileSidebarOpen"
+      >
+        <FontAwesomeIcon :icon="mobileSidebarOpen ? faXmark : faBars" aria-hidden="true" />
+        <span>{{ mobileSidebarOpen ? 'Close menu' : 'Menu' }}</span>
+      </button>
       <div class="d-flex align-items-start">
-        <div class="navbar">
+        <div id="dashboard-sidebar" class="navbar" :class="{ 'mobile-open': mobileSidebarOpen }">
           <div
             class="nav flex-column nav-pills me-3 navbarplate"
             role="tablist"
@@ -29,6 +46,15 @@
               </div>
               <div class="signout">
                 <button type="button" class="sign-out-btn" @click="signOut">Sign out</button>
+                <button
+                  type="button"
+                  class="appearance-toggle"
+                  :aria-pressed="isDarkMode"
+                  @click="toggleAppearance"
+                >
+                  <FontAwesomeIcon :icon="isDarkMode ? faSun : faMoon" aria-hidden="true" />
+                  <span>{{ isDarkMode ? 'Light mode' : 'Dark mode' }}</span>
+                </button>
               </div>
             </div>
           </div>
@@ -239,9 +265,9 @@
                       v-for="application in paginatedApplications"
                       :key="application.role + application.company"
                     >
-                      <td scope="row">{{ application.role }}</td>
-                      <td>{{ application.company }}</td>
-                      <td>
+                      <td scope="row" data-label="Role">{{ application.role }}</td>
+                      <td data-label="Company">{{ application.company }}</td>
+                      <td data-label="Status">
                         <span
                           class="application-status"
                           :class="`status-${application.status.toLowerCase().replaceAll(' ', '-')}`"
@@ -249,7 +275,7 @@
                           {{ application.status }}
                         </span>
                       </td>
-                      <td class="application-date">{{ application.date }}</td>
+                      <td class="application-date" data-label="Applied">{{ application.date }}</td>
                     </tr>
                   </tbody>
                 </table>
@@ -330,7 +356,7 @@
               <p>{{ unreadMessageCount }} unread conversations.</p>
             </div>
             <div class="messagesection-content">
-              <div class="d-flex align-items-start message-layout">
+              <div v-if="inboxMessages.length" class="d-flex align-items-start message-layout">
                 <div
                   class="nav flex-column nav-pills me-3 message-btn"
                   role="tablist"
@@ -351,24 +377,53 @@
                   </button>
                 </div>
                 <div class="message-preview">
-                  <h4>{{ selectedMessage.company }}</h4>
-                  <p class="message-subject">{{ selectedMessage.subject }}</p>
+                  <header class="message-preview-heading">
+                    <div class="message-sender">
+                      <span class="message-sender-initials" aria-hidden="true">
+                        {{ selectedMessage.company.slice(0, 2).toUpperCase() }}
+                      </span>
+                      <div>
+                        <h4>{{ selectedMessage.company }}</h4>
+                        <p class="message-subject">{{ selectedMessage.subject }}</p>
+                      </div>
+                    </div>
+                    <button
+                      v-if="!selectedMessage.unread || selectedMessage.reply.trim()"
+                      type="button"
+                      class="delete-message-btn"
+                      @click="handleMessageDelete(selectedMessage.id)"
+                    >
+                      Delete message
+                    </button>
+                  </header>
                   <div class="message-body">{{ selectedMessage.body }}</div>
                   <div class="message-meta">
-                    <span>{{ selectedMessage.time }}</span>
+                    <span class="message-time">{{ selectedMessage.time }}</span>
                     <div class="reply-section">
+                      <label class="reply-label" :for="`reply-${selectedMessage.id}`"
+                        >Your reply</label
+                      >
                       <textarea
+                        :id="`reply-${selectedMessage.id}`"
                         class="reply-input"
                         v-model="selectedMessage.reply"
-                        type="text"
-                        placeholder="Type your reply..."
+                        rows="5"
+                        placeholder="Write a reply..."
                       >
                       </textarea>
-                      <button type="button" class="reply-btn" @click="replyToMessage">Reply</button>
+                      <div class="reply-actions">
+                        <p v-if="replyStatus" class="reply-status">{{ replyStatus }}</p>
+                        <button type="button" class="reply-btn" @click="replyToMessage">
+                          Prepare reply
+                        </button>
+                      </div>
                     </div>
-                    <p v-if="replyStatus" class="reply-status">{{ replyStatus }}</p>
                   </div>
                 </div>
+              </div>
+              <div v-else class="messages-empty-state" role="status">
+                <h4>No messages available.</h4>
+                <p>Your inbox is clear.</p>
               </div>
             </div>
           </div>
@@ -494,9 +549,13 @@
                           autocomplete="organization-title"
                         />
                       </label>
-                      <div class="profile-suggestions" aria-label="Suggested target roles">
+                      <div
+                        v-if="matchingRoleSuggestions.length"
+                        class="profile-suggestions"
+                        aria-label="Suggested target roles"
+                      >
                         <button
-                          v-for="role in roleSuggestions"
+                          v-for="role in matchingRoleSuggestions"
                           :key="role"
                           type="button"
                           class="profile-suggestion"
@@ -507,20 +566,81 @@
                         </button>
                       </div>
                     </div>
+                    <div class="profile-field-group">
+                      <label class="profile-field">
+                        <span>Country</span>
+                        <input
+                          v-model.trim="locationCountryDraft"
+                          type="text"
+                          autocomplete="country-name"
+                        />
+                      </label>
+                      <div
+                        v-if="matchingCountrySuggestions.length"
+                        class="profile-suggestions"
+                        aria-label="Suggested countries"
+                      >
+                        <button
+                          v-for="country in matchingCountrySuggestions"
+                          :key="country"
+                          type="button"
+                          class="profile-suggestion"
+                          @click="locationCountryDraft = country"
+                        >
+                          {{ country }}
+                        </button>
+                      </div>
+                    </div>
+                    <div class="profile-field-group">
+                      <label class="profile-field">
+                        <span>State or region</span>
+                        <input
+                          v-model.trim="locationRegionDraft"
+                          type="text"
+                          autocomplete="address-level1"
+                        />
+                      </label>
+                      <div
+                        v-if="matchingRegionSuggestions.length"
+                        class="profile-suggestions"
+                        aria-label="Suggested states or regions"
+                      >
+                        <button
+                          v-for="region in matchingRegionSuggestions"
+                          :key="region"
+                          type="button"
+                          class="profile-suggestion"
+                          @click="locationRegionDraft = region"
+                        >
+                          {{ region }}
+                        </button>
+                      </div>
+                    </div>
                     <label class="profile-field">
-                      <span>Location</span>
+                      <span>Country calling code</span>
                       <input
-                        v-model.trim="profileDraft.location"
-                        type="text"
-                        autocomplete="address-level2"
+                        v-model.trim="phoneCountryCodeDraft"
+                        type="tel"
+                        list="profile-phone-country-codes"
+                        autocomplete="tel-country-code"
+                        placeholder="+234"
                       />
+                      <datalist id="profile-phone-country-codes">
+                        <option
+                          v-for="countryCode in phoneCountryCodes"
+                          :key="countryCode.code"
+                          :value="countryCode.code"
+                          :label="countryCode.country"
+                        />
+                      </datalist>
                     </label>
                     <label class="profile-field">
-                      <span>Phone</span>
+                      <span>Phone number</span>
                       <input
-                        v-model.trim="profileDraft.phoneNumber"
+                        v-model.trim="phoneNumberDraft"
                         type="tel"
-                        autocomplete="tel"
+                        autocomplete="tel-national"
+                        placeholder="801 234 5678"
                       />
                     </label>
                     <label class="profile-field">
@@ -553,14 +673,17 @@
                           placeholder="Product design, Figma, Research"
                         />
                       </label>
-                      <div class="profile-suggestions" aria-label="Suggested skills">
+                      <div
+                        v-if="matchingSkillSuggestions.length"
+                        class="profile-suggestions"
+                        aria-label="Suggested skills"
+                      >
                         <button
-                          v-for="skill in profileSkillSuggestions"
+                          v-for="skill in matchingSkillSuggestions"
                           :key="skill"
                           type="button"
                           class="profile-suggestion"
-                          :class="{ selected: selectedProfileSkillNames.has(skill.toLowerCase()) }"
-                          @click="toggleProfileSkillSuggestion(skill)"
+                          @click="selectProfileSkillSuggestion(skill)"
                         >
                           {{ skill }}
                         </button>
@@ -652,6 +775,8 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
+import { faBars, faMoon, faSun, faXmark } from '@fortawesome/free-solid-svg-icons'
 import { useRouter } from 'vue-router'
 import HeaderB from '../components/HeaderB.vue'
 import { jobs } from '../data/jobs'
@@ -677,19 +802,242 @@ const activeApplicationFilter = computed(() => store.activeApplicationFilter)
 const currentApplicationPage = ref(1)
 const currentSavedJobsPage = ref(1)
 const currentNotificationPage = ref(1)
+const mobileSidebarOpen = ref(false)
+const isDarkMode = ref(localStorage.getItem('jobboard.dashboard.theme') === 'dark')
 const profileEditDialog = ref<HTMLDialogElement | null>(null)
 const profileDraft = ref<UserProfile>({ ...store.userProfile })
 const profileSkillsDraft = ref('')
+const locationCountryDraft = ref('')
+const locationRegionDraft = ref('')
+const phoneCountryCodeDraft = ref('+234')
+const phoneNumberDraft = ref('')
 const profileSkillSuggestions = [
+  'Accessibility',
+  'Agile / Scrum',
+  'API design',
+  'Account management',
+  'AWS',
+  'Business development',
+  'Cloud infrastructure',
+  'Content marketing',
+  'Cypress',
+  'Cybersecurity',
+  'CSS',
+  'Data analysis',
+  'Data visualization',
+  'Docker',
+  'Excel',
   'UX design',
   'Figma',
-  'User research',
-  'Product strategy',
-  'Data analysis',
+  'HTML',
+  'Interaction design',
+  'JavaScript',
+  'Machine learning',
+  'Manual testing',
+  'Negotiation',
+  'Node.js',
+  'Power BI',
+  'Product design',
   'Quality assurance',
-  'Cloud infrastructure',
-  'Cybersecurity',
+  'Product strategy',
+  'Prototyping',
+  'Python',
+  'React',
+  'Recruitment',
+  'Research',
+  'Sales strategy',
+  'Selenium',
+  'SEO',
+  'Social media marketing',
+  'SQL',
+  'Tableau',
+  'Talent acquisition',
+  'Test automation',
+  'TypeScript',
+  'User research',
+  'Usability testing',
+  'Visual design',
+  'Vue.js',
+  'Wireframing',
 ]
+const countrySuggestions = [
+  'Australia',
+  'Brazil',
+  'Cameroon',
+  'Canada',
+  'China',
+  'Egypt',
+  'France',
+  'Germany',
+  'Ghana',
+  'India',
+  'Ireland',
+  'Italy',
+  'Japan',
+  'Kenya',
+  'Netherlands',
+  'New Zealand',
+  'Nigeria',
+  'Pakistan',
+  'Philippines',
+  'Rwanda',
+  'Singapore',
+  'South Africa',
+  'Spain',
+  'Sweden',
+  'Switzerland',
+  'Tanzania',
+  'Uganda',
+  'United Arab Emirates',
+  'United Kingdom',
+  'United States',
+  'Zimbabwe',
+]
+const phoneCountryCodes = [
+  { country: 'Australia', code: '+61' },
+  { country: 'Brazil', code: '+55' },
+  { country: 'Canada', code: '+1' },
+  { country: 'China', code: '+86' },
+  { country: 'France', code: '+33' },
+  { country: 'Germany', code: '+49' },
+  { country: 'Ghana', code: '+233' },
+  { country: 'India', code: '+91' },
+  { country: 'Ireland', code: '+353' },
+  { country: 'Japan', code: '+81' },
+  { country: 'Kenya', code: '+254' },
+  { country: 'Netherlands', code: '+31' },
+  { country: 'New Zealand', code: '+64' },
+  { country: 'Nigeria', code: '+234' },
+  { country: 'Pakistan', code: '+92' },
+  { country: 'Philippines', code: '+63' },
+  { country: 'Rwanda', code: '+250' },
+  { country: 'Singapore', code: '+65' },
+  { country: 'South Africa', code: '+27' },
+  { country: 'Spain', code: '+34' },
+  { country: 'Switzerland', code: '+41' },
+  { country: 'Tanzania', code: '+255' },
+  { country: 'Uganda', code: '+256' },
+  { country: 'United Arab Emirates', code: '+971' },
+  { country: 'United Kingdom', code: '+44' },
+  { country: 'United States', code: '+1' },
+  { country: 'Zimbabwe', code: '+263' },
+]
+const regionsByCountry: Record<string, string[]> = {
+  Australia: [
+    'Australian Capital Territory',
+    'New South Wales',
+    'Northern Territory',
+    'Queensland',
+    'South Australia',
+    'Tasmania',
+    'Victoria',
+    'Western Australia',
+  ],
+  Canada: [
+    'Alberta',
+    'British Columbia',
+    'Manitoba',
+    'New Brunswick',
+    'Newfoundland and Labrador',
+    'Northwest Territories',
+    'Nova Scotia',
+    'Nunavut',
+    'Ontario',
+    'Prince Edward Island',
+    'Quebec',
+    'Saskatchewan',
+    'Yukon',
+  ],
+  Ghana: [
+    'Ahafo',
+    'Ashanti',
+    'Bono',
+    'Bono East',
+    'Central',
+    'Eastern',
+    'Greater Accra',
+    'North East',
+    'Northern',
+    'Oti',
+    'Savannah',
+    'Upper East',
+    'Upper West',
+    'Volta',
+    'Western',
+    'Western North',
+  ],
+  Nigeria: [
+    'Abia',
+    'Adamawa',
+    'Akwa Ibom',
+    'Anambra',
+    'Bauchi',
+    'Bayelsa',
+    'Benue',
+    'Borno',
+    'Cross River',
+    'Delta',
+    'Ebonyi',
+    'Edo',
+    'Ekiti',
+    'Enugu',
+    'FCT',
+    'Gombe',
+    'Imo',
+    'Jigawa',
+    'Kaduna',
+    'Kano',
+    'Katsina',
+    'Kebbi',
+    'Kogi',
+    'Kwara',
+    'Lagos',
+    'Nasarawa',
+    'Niger',
+    'Ogun',
+    'Ondo',
+    'Osun',
+    'Oyo',
+    'Plateau',
+    'Rivers',
+    'Sokoto',
+    'Taraba',
+    'Yobe',
+    'Zamfara',
+  ],
+  'South Africa': [
+    'Eastern Cape',
+    'Free State',
+    'Gauteng',
+    'KwaZulu-Natal',
+    'Limpopo',
+    'Mpumalanga',
+    'North West',
+    'Northern Cape',
+    'Western Cape',
+  ],
+  'United Kingdom': ['England', 'Northern Ireland', 'Scotland', 'Wales'],
+  'United States': [
+    'Alabama',
+    'Alaska',
+    'Arizona',
+    'California',
+    'Colorado',
+    'Florida',
+    'Georgia',
+    'Illinois',
+    'Massachusetts',
+    'Michigan',
+    'New Jersey',
+    'New York',
+    'North Carolina',
+    'Ohio',
+    'Pennsylvania',
+    'Texas',
+    'Virginia',
+    'Washington',
+  ],
+}
 const applicationsPerPage = 4
 const savedJobsPerPage = 4
 const notificationsPerPage = 2
@@ -702,10 +1050,57 @@ const notifications = computed(() => store.notifications)
 const settings = computed(() => store.settings)
 const skills = computed(() => store.skills)
 const selectedSkills = computed(() => skills.value.filter((skill) => skill.selected))
-const roleSuggestions = computed(() => [...new Set(jobs.map((job) => job.title))].slice(0, 6))
-const selectedProfileSkillNames = computed(
-  () => new Set(profileSkillsDraft.value.split(',').map((name) => name.trim().toLowerCase())),
+const roleSuggestions = computed(() => [...new Set(jobs.map((job) => job.title))])
+const matchingRoleSuggestions = computed(() => {
+  const query = profileDraft.value.role.trim().toLowerCase()
+  if (!query) return []
+
+  return roleSuggestions.value
+    .filter((role) => role.toLowerCase().includes(query) && role.toLowerCase() !== query)
+    .slice(0, 8)
+})
+const matchingCountrySuggestions = computed(() => {
+  const query = locationCountryDraft.value.trim().toLowerCase()
+  if (!query) return []
+
+  return countrySuggestions
+    .filter((country) => country.toLowerCase().includes(query) && country.toLowerCase() !== query)
+    .slice(0, 8)
+})
+const matchingRegionSuggestions = computed(() => {
+  const query = locationRegionDraft.value.trim().toLowerCase()
+  const regions = regionsByCountry[locationCountryDraft.value.trim()] || []
+  if (!query) return []
+
+  return regions
+    .filter((region) => region.toLowerCase().includes(query) && region.toLowerCase() !== query)
+    .slice(0, 8)
+})
+const profileSkillQuery = computed(
+  () => profileSkillsDraft.value.split(',').at(-1)?.trim().toLowerCase() || '',
 )
+const selectedProfileSkillNames = computed(
+  () =>
+    new Set(
+      profileSkillsDraft.value
+        .split(',')
+        .slice(0, -1)
+        .map((name) => name.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+)
+const matchingSkillSuggestions = computed(() => {
+  const query = profileSkillQuery.value
+  if (!query) return []
+
+  return profileSkillSuggestions
+    .filter(
+      (skill) =>
+        skill.toLowerCase().includes(query) &&
+        !selectedProfileSkillNames.value.has(skill.toLowerCase()),
+    )
+    .slice(0, 8)
+})
 const overviewStats = computed(() => store.overviewStats)
 const recentApplications = computed(() => store.recentApplications)
 const applicationFilters = computed(
@@ -759,6 +1154,10 @@ function setActiveTab(tab: DashboardTab) {
 }
 function handleTabSelect(tab: DashboardTab) {
   setActiveTab(tab)
+  closeMobileSidebar()
+}
+function closeMobileSidebar() {
+  mobileSidebarOpen.value = false
 }
 function handleSavedJobRemove(jobId: number) {
   store.removeSavedJob(jobId)
@@ -766,9 +1165,22 @@ function handleSavedJobRemove(jobId: number) {
 function handleSettingsUpdate() {
   store.updateSettings(settings.value)
 }
+function toggleAppearance() {
+  isDarkMode.value = !isDarkMode.value
+  localStorage.setItem('jobboard.dashboard.theme', isDarkMode.value ? 'dark' : 'light')
+}
 function startProfileEdit() {
   profileDraft.value = { ...userProfile.value }
   profileSkillsDraft.value = selectedSkills.value.map((skill) => skill.name).join(', ')
+  const locationParts = userProfile.value.location
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+  locationCountryDraft.value = locationParts.length > 1 ? locationParts.pop() || '' : ''
+  locationRegionDraft.value = locationParts.join(', ')
+  const phoneMatch = userProfile.value.phoneNumber.match(/^(\+\d{1,4})\s*(.*)$/)
+  phoneCountryCodeDraft.value = phoneMatch?.[1] || '+234'
+  phoneNumberDraft.value = phoneMatch?.[2] || userProfile.value.phoneNumber
   profileEditDialog.value?.showModal()
 }
 function cancelProfileEdit() {
@@ -777,18 +1189,25 @@ function cancelProfileEdit() {
 function resetProfileEditDraft() {
   profileDraft.value = { ...userProfile.value }
   profileSkillsDraft.value = selectedSkills.value.map((skill) => skill.name).join(', ')
+  const locationParts = userProfile.value.location
+    .split(',')
+    .map((part) => part.trim())
+    .filter(Boolean)
+  locationCountryDraft.value = locationParts.length > 1 ? locationParts.pop() || '' : ''
+  locationRegionDraft.value = locationParts.join(', ')
+  const phoneMatch = userProfile.value.phoneNumber.match(/^(\+\d{1,4})\s*(.*)$/)
+  phoneCountryCodeDraft.value = phoneMatch?.[1] || '+234'
+  phoneNumberDraft.value = phoneMatch?.[2] || userProfile.value.phoneNumber
 }
-function toggleProfileSkillSuggestion(skill: string) {
-  const names = profileSkillsDraft.value
+function selectProfileSkillSuggestion(skill: string) {
+  const nameParts = profileSkillsDraft.value
     .split(',')
     .map((name) => name.trim())
     .filter(Boolean)
-  const selectedIndex = names.findIndex((name) => name.toLowerCase() === skill.toLowerCase())
+  const names = nameParts.slice(0, -1)
+  if (!names.some((name) => name.toLowerCase() === skill.toLowerCase())) names.push(skill)
 
-  if (selectedIndex >= 0) names.splice(selectedIndex, 1)
-  else names.push(skill)
-
-  profileSkillsDraft.value = names.join(', ')
+  profileSkillsDraft.value = `${names.join(', ')}, `
 }
 function handleResumeFileChange(event: Event) {
   const input = event.target as HTMLInputElement
@@ -804,8 +1223,12 @@ function saveProfile() {
     ...profileDraft.value,
     name: profileDraft.value.name.trim(),
     role: profileDraft.value.role.trim(),
-    location: profileDraft.value.location.trim(),
-    phoneNumber: profileDraft.value.phoneNumber.trim(),
+    location: [locationRegionDraft.value.trim(), locationCountryDraft.value.trim()]
+      .filter(Boolean)
+      .join(', '),
+    phoneNumber: phoneNumberDraft.value.trim()
+      ? `${phoneCountryCodeDraft.value.trim()} ${phoneNumberDraft.value.trim()}`.trim()
+      : '',
     about: profileDraft.value.about.trim(),
     linkedinUrl: profileDraft.value.linkedinUrl.trim(),
     skill: skillNames.join(', '),
@@ -854,6 +1277,9 @@ function replyToMessage() {
 }
 function selectMessage(id: number) {
   store.selectMessage(id)
+}
+function handleMessageDelete(id: number) {
+  store.deleteMessage(id)
 }
 function signOut() {
   store.signOut()
@@ -937,6 +1363,11 @@ body {
   background: linear-gradient(180deg, #01101c 0%, #071d2c 100%);
   border-right: 1px solid rgba(255, 255, 255, 0.08);
   box-shadow: 12px 0 28px rgba(2, 11, 19, 0.12);
+}
+
+.mobile-sidebar-toggle,
+.mobile-sidebar-backdrop {
+  display: none;
 }
 
 .sectionA .navbar .navbarplate {
@@ -1200,9 +1631,10 @@ body {
 }
 
 .nav-footer .name-i {
-  display: flex;
-  flex-direction: row;
-  padding: 0 5px;
+  display: grid;
+  grid-template-columns: 42px minmax(0, 1fr);
+  width: 100%;
+  padding: 0;
   gap: 10px;
   align-items: center;
 }
@@ -1224,20 +1656,48 @@ body {
 
 .nav-footer .profile-name {
   display: flex;
+  min-width: 0;
   flex-direction: column;
+  overflow: hidden;
 }
 
 .nav-footer .profile-name p {
   margin: 0;
-  font-size: 1rem;
+  overflow: hidden;
+  font-size: 0.9rem;
   font-weight: 600;
   color: #d2efff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .nav-footer .profile-name span {
   margin: 0;
+  overflow: hidden;
   font-weight: 300;
   color: #d2efff;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nav-footer {
+  width: 100%;
+  margin-top: auto;
+  padding: 16px 6px 4px;
+  border-top: 1px solid rgba(210, 239, 255, 0.14);
+}
+
+.nav-footer .signout {
+  grid-column: 1 / -1;
+}
+
+.nav-footer .sign-out-btn {
+  width: 100%;
+  min-height: 36px;
+  margin: 12px 0 0;
+  border: 1px solid rgba(210, 239, 255, 0.2);
+  border-radius: 7px;
+  text-align: center;
 }
 
 .app-section {
@@ -1326,7 +1786,7 @@ body {
 
 .applications-table-wrap {
   width: 100%;
-  overflow-x: auto;
+  overflow-x: hidden;
   border: 1px solid rgba(7, 26, 41, 0.1);
   border-radius: 10px;
   background: #ffffff;
@@ -1334,7 +1794,8 @@ body {
 
 .app-section .applications-table {
   width: 100%;
-  min-width: 600px;
+  min-width: 0;
+  table-layout: fixed;
   border: 0;
   border-collapse: collapse;
   background: transparent;
@@ -1343,9 +1804,10 @@ body {
 
 .applications-table th,
 .applications-table td {
-  padding: 14px 18px;
+  padding: 12px 10px;
   text-align: left;
   border-bottom: 1px solid rgba(7, 26, 41, 0.08);
+  overflow-wrap: anywhere;
 }
 
 .applications-table th {
@@ -1373,6 +1835,11 @@ body {
 .applications-table td:first-child {
   color: #071a29;
   font-weight: 650;
+}
+
+.application-status {
+  max-width: 100%;
+  white-space: normal;
 }
 
 .dashboard-pagination {
@@ -1488,26 +1955,117 @@ body {
 .message-preview {
   flex: 1;
   min-width: 0;
-  background: linear-gradient(180deg, #f9fcff 0%, #edf6ff 100%);
-  border: 1px solid rgba(20, 134, 195, 0.12);
-  border-radius: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  border: 1px solid rgba(7, 26, 41, 0.1);
+  border-radius: 12px;
   padding: 22px;
-  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.04);
+  background: #ffffff;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.05);
 }
 
 .message-preview h4 {
-  margin: 0 0 8px;
+  margin: 0 0 4px;
+}
+
+.message-preview-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(7, 26, 41, 0.1);
+}
+
+.message-sender {
+  display: flex;
+  min-width: 0;
+  flex: 1;
+  align-items: center;
+  gap: 12px;
+}
+
+.message-sender-initials {
+  display: grid;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 40px;
+  place-items: center;
+  border-radius: 10px;
+  background: #e8f5fb;
+  color: #075985;
+  font-size: 0.8rem;
+  font-weight: 800;
+}
+
+.message-sender > div {
+  min-width: 0;
+}
+
+.delete-message-btn {
+  flex: 0 0 auto;
+  padding: 7px 10px;
+  border: 1px solid rgba(162, 53, 44, 0.24);
+  border-radius: 6px;
+  background: #fff;
+  color: #a2352c;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.delete-message-btn:hover {
+  background: #fcebea;
+}
+
+.delete-message-btn:focus-visible {
+  outline: 2px solid #a2352c;
+  outline-offset: 2px;
+}
+
+.messages-empty-state {
+  display: grid;
+  min-height: 220px;
+  align-content: center;
+  justify-items: center;
+  gap: 6px;
+  text-align: center;
+  color: rgba(15, 23, 42, 0.72);
+}
+
+.messages-empty-state h4,
+.messages-empty-state p {
+  margin: 0;
+}
+
+.messages-empty-state h4 {
+  color: #263746;
+  font-size: 1rem;
+}
+
+.messages-empty-state p {
+  color: rgba(15, 23, 42, 0.62);
+  font-size: 0.9rem;
 }
 
 .message-subject {
-  color: #1486c3;
-  font-weight: 700;
-  margin: 0 0 12px;
+  margin: 0;
+  color: #526273;
+  font-size: 0.9rem;
 }
 
 .message-body {
-  color: rgba(15, 23, 42, 0.8);
+  min-height: 110px;
+  padding: 16px;
+  border: 1px solid rgba(7, 26, 41, 0.07);
+  border-radius: 10px;
+  background: #f5f8fa;
+  color: rgba(15, 23, 42, 0.82);
   line-height: 1.6;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
 }
 
 .message-btn .nav-link {
@@ -1515,30 +2073,76 @@ body {
 }
 
 .message-meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 18px;
+  display: grid;
+  gap: 10px;
   color: rgba(15, 23, 42, 0.7);
 }
 
+.message-time {
+  justify-self: end;
+  color: rgba(15, 23, 42, 0.58);
+  font-size: 0.76rem;
+}
+
+.reply-section {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reply-label {
+  color: #263746;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+
 .reply-input {
-  flex: 1;
-  padding: 8px 12px;
-  border: 1px solid rgba(20, 134, 195, 0.28);
-  border-radius: 10px;
-  margin-right: 8px;
-  min-width: 120px;
-  max-width: 30%;
-  min-height: 60px;
-  max-height: 150px;
-  position: relative;
+  width: 100%;
+  min-width: 0;
+  min-height: 128px;
+  max-height: 320px;
+  margin: 0;
+  padding: 13px 14px;
+  border: 1px solid rgba(7, 26, 41, 0.16);
+  border-radius: 9px;
+  background: #fff;
+  color: #0f172a;
+  font: inherit;
+  line-height: 1.5;
   resize: vertical;
 }
 
+.reply-input:focus {
+  border-color: #1486c3;
+  outline: 2px solid rgba(20, 134, 195, 0.15);
+}
+
+.reply-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.reply-section .reply-btn {
+  min-height: 40px;
+  margin: 0;
+  padding: 9px 16px;
+  border: 1px solid #071a29;
+  border-radius: 6px;
+  background: #071a29;
+  color: #fff;
+}
+
+.reply-section .reply-btn:hover {
+  background: #123b56;
+}
+
 .reply-status {
-  margin-top: 12px;
+  margin: 0;
   color: #127a5d;
+  font-size: 0.84rem;
   font-weight: 700;
 }
 
@@ -1873,9 +2477,13 @@ body {
 
 .profile-suggestions {
   display: flex;
+  max-height: 104px;
   flex-wrap: wrap;
   gap: 6px;
   margin-top: 8px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px;
 }
 
 .profile-suggestion {
@@ -2038,10 +2646,6 @@ input:checked + .slider:before {
   transform: translateX(24px);
 }
 
-.nav-footer {
-  margin-top: 170px;
-}
-
 @media (max-width: 1100px) {
   .overview-content .partB {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2064,24 +2668,73 @@ input:checked + .slider:before {
   }
 
   .sectionA .navbar {
-    position: relative;
-    top: 0;
-    left: auto;
-    z-index: auto;
-    width: 100%;
-    min-width: 100%;
+    position: fixed;
+    top: 64px;
+    bottom: 0;
+    left: 0;
+    z-index: 1201;
+    width: min(300px, calc(100vw - 48px));
+    min-width: 0;
     height: auto;
-    border-radius: 0 0 20px 20px;
+    max-height: calc(100dvh - 64px);
+    padding: 18px 14px max(18px, env(safe-area-inset-bottom));
+    border-radius: 0 12px 0 0;
+    transform: translateX(-105%);
+    transition: transform 0.24s ease;
+    overflow-y: auto;
+  }
+
+  .sectionA .navbar.mobile-open {
+    transform: translateX(0);
   }
 
   .sectionA .navbar .navbarplate {
-    flex-direction: row;
-    flex-wrap: wrap;
+    flex-direction: column;
+    flex-wrap: nowrap;
   }
 
   .sectionA .navbar button {
     width: 100%;
     max-width: none;
+  }
+
+  .nav-footer {
+    margin-top: auto;
+  }
+
+  .mobile-sidebar-backdrop {
+    position: fixed;
+    inset: 64px 0 0;
+    z-index: 1200;
+    display: block;
+    width: 100%;
+    border: 0;
+    background: rgba(1, 16, 28, 0.52);
+  }
+
+  .mobile-sidebar-toggle {
+    position: fixed;
+    bottom: calc(16px + env(safe-area-inset-bottom));
+    left: 16px;
+    z-index: 1300;
+    display: inline-flex;
+    min-height: 46px;
+    align-items: center;
+    gap: 9px;
+    padding: 0 15px;
+    border: 1px solid rgba(210, 239, 255, 0.22);
+    border-radius: 8px;
+    background: #071a29;
+    color: #fff;
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    box-shadow: 0 8px 24px rgba(1, 16, 28, 0.26);
+  }
+
+  .mobile-sidebar-toggle:focus-visible {
+    outline: 2px solid #36d2ff;
+    outline-offset: 3px;
   }
 
   .sectionA .page-content {
@@ -2110,6 +2763,19 @@ input:checked + .slider:before {
   }
 
   .message-layout {
+    flex-direction: column;
+  }
+
+  .message-preview-heading {
+    flex-wrap: wrap;
+  }
+
+  .message-preview {
+    padding: 16px;
+  }
+
+  .reply-actions {
+    align-items: flex-start;
     flex-direction: column;
   }
 
@@ -2238,6 +2904,133 @@ input:checked + .slider:before {
   .savedjob-tiles,
   .profile-section .profile-content {
     padding: 12px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sectionA .navbar {
+    transition: none;
+  }
+}
+
+.dashboard.theme-dark .sectionA {
+  background: linear-gradient(180deg, #0c1820 0%, #101e29 100%);
+}
+
+.dashboard.theme-dark .tab-pane {
+  border-color: #29414e;
+  background: linear-gradient(180deg, #142936 0%, #11232e 100%);
+  color: #e4edf2;
+  box-shadow: none;
+}
+
+.dashboard.theme-dark .tab-pane h2,
+.dashboard.theme-dark .tab-pane h3,
+.dashboard.theme-dark .tab-pane h4,
+.dashboard.theme-dark .tab-pane h5,
+.dashboard.theme-dark .tab-pane th,
+.dashboard.theme-dark .tab-pane dt,
+.dashboard.theme-dark .tab-pane td:first-child {
+  color: #e7eef2;
+}
+
+.dashboard.theme-dark .tab-pane p,
+.dashboard.theme-dark .tab-pane dd,
+.dashboard.theme-dark .tab-pane .message-time,
+.dashboard.theme-dark .tab-pane .application-date {
+  color: #b7c7d1;
+}
+
+.dashboard.theme-dark .profile-tile,
+.dashboard.theme-dark .overview-content .partC > div,
+.dashboard.theme-dark .savedjob-tiles,
+.dashboard.theme-dark .message-preview,
+.dashboard.theme-dark .profile-content,
+.dashboard.theme-dark .settings-body,
+.dashboard.theme-dark .setting-major,
+.dashboard.theme-dark .message-btn {
+  border-color: #2a4351;
+  background: #172d3a;
+  color: #e4edf2;
+  box-shadow: none;
+}
+
+.dashboard.theme-dark .applications-table-wrap,
+.dashboard.theme-dark .applications-table tbody tr {
+  border-color: #2a4351;
+  background: #172d3a;
+}
+
+.dashboard.theme-dark .applications-table th {
+  background: #203b4a;
+}
+
+.dashboard.theme-dark .applications-table td,
+.dashboard.theme-dark .applications-table th {
+  border-color: #2a4351;
+}
+
+.dashboard.theme-dark .message-body {
+  border-color: #2a4351;
+  background: #10232e;
+  color: #dce7ed;
+}
+
+.dashboard.theme-dark .reply-input,
+.dashboard.theme-dark .profile-field input,
+.dashboard.theme-dark .profile-field textarea {
+  border-color: #36515f;
+  background: #10232e;
+  color: #e4edf2;
+}
+
+.dashboard.theme-dark .profile-detail-item {
+  border-color: #2a4351;
+}
+
+.dashboard.theme-dark .profile-suggestion,
+.dashboard.theme-dark .application-filter,
+.dashboard.theme-dark .dashboard-pagination button {
+  border-color: #36515f;
+  background: #172d3a;
+  color: #dce7ed;
+}
+
+.dashboard.theme-dark .profile-suggestion.selected,
+.dashboard.theme-dark .application-filter.active {
+  background: #1d5068;
+  color: #eff8fc;
+}
+
+.dashboard.theme-dark .application-filter:hover,
+.dashboard.theme-dark .profile-suggestion:hover {
+  background: #203b4a;
+}
+
+.dashboard.theme-dark .application-status {
+  color: #f0f6f8;
+}
+
+.dashboard.theme-dark .nav-footer .sign-out-btn,
+.dashboard.theme-dark .appearance-toggle {
+  border-color: rgba(210, 239, 255, 0.2);
+  color: #d2efff;
+}
+
+.dashboard.theme-dark .profile-edit-dialog {
+  border-color: #2a4351;
+  background: #142936;
+  color: #e4edf2;
+}
+
+.dashboard.theme-dark .profile-field {
+  color: #dce7ed;
+}
+
+@media (max-width: 768px) {
+  .dashboard.theme-dark .app-section .applications-table tbody tr {
+    border-color: #2a4351;
+    background: #172d3a;
   }
 }
 </style>

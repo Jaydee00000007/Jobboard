@@ -306,13 +306,33 @@ export const useJobhuntStore = defineStore(
     }
 
     function selectMessage(id: number) {
+      const message = inboxMessages.value.find((entry) => entry.id === id)
+      if (!message) return
+
+      message.unread = false
       activeMessageId.value = id
+      replyStatus.value = ''
+    }
+    function deleteMessage(id: number) {
+      const message = inboxMessages.value.find((entry) => entry.id === id)
+      if (!message || (message.unread && !message.reply.trim())) return
+
+      inboxMessages.value = inboxMessages.value.filter((entry) => entry.id !== id)
+      if (activeMessageId.value === id) {
+        const nextMessage = inboxMessages.value[0]
+        activeMessageId.value = nextMessage?.id ?? 0
+        if (nextMessage) nextMessage.unread = false
+      }
+      replyStatus.value = ''
     }
     function markAllNotificationsRead() {
       notifications.value = []
     }
     function replyToMessage() {
-      replyStatus.value = `Draft reply ready for ${selectedMessage.value.company}.`
+      const message = selectedMessage.value
+      if (!message) return
+
+      replyStatus.value = `Draft reply ready for ${message.company}.`
     }
     function toggleSkill(id: number) {
       skills.value = skills.value.map((skill) =>
@@ -449,6 +469,7 @@ export const useJobhuntStore = defineStore(
       allNotificationsRead,
       applicationFilters,
       applications,
+      deleteMessage,
       filteredApplications,
       inboxMessages,
       isAuthenticated,
