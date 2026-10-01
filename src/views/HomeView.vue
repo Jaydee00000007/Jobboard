@@ -13,15 +13,6 @@ import Footer from '../components/Footer.vue'
 </script>
 
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
 .homepage {
   min-height: 100dvh;
   background-color: #071a29;

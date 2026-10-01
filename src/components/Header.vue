@@ -6,17 +6,33 @@
         <span>Job Hunt</span>
       </RouterLink>
 
-      <ul class="nav-link">
-        <li><RouterLink to="/">Home</RouterLink></li>
-        <li><RouterLink to="/about">About us</RouterLink></li>
-        <li><RouterLink to="/jobs">Find jobs</RouterLink></li>
-        <li><RouterLink to="/faq">FAQ</RouterLink></li>
-      </ul>
+      <button
+        class="menu-toggle"
+        type="button"
+        :aria-expanded="menuOpen"
+        aria-controls="primary-menu"
+        aria-label="Toggle navigation"
+        @click="menuOpen = !menuOpen"
+      >
+        <span></span><span></span><span></span>
+      </button>
+
+      <div id="primary-menu" class="nav-content" :class="{ open: menuOpen }">
+        <ul class="nav-link">
+          <li><RouterLink to="/">Home</RouterLink></li>
+          <li><RouterLink to="/about">About us</RouterLink></li>
+          <li><RouterLink to="/jobs">Find jobs</RouterLink></li>
+          <li><RouterLink to="/faq">FAQ</RouterLink></li>
+        </ul>
+      </div>
     </nav>
   </header>
 </template>
 
 <script setup lang="ts">
+import { ref } from 'vue'
+
+const menuOpen = ref(false)
 </script>
 
 <style scoped>
@@ -25,6 +41,7 @@ nav {
   justify-content: space-between;
   align-items: center;
   gap: 5px;
+  box-sizing: border-box;
   padding: 0 40px;
   background-color: #071a29;
   margin: 0;
@@ -52,7 +69,7 @@ nav {
 }
 
 .logo span {
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   font-weight: 900;
   font-size: 15px;
 }
@@ -70,7 +87,7 @@ nav {
 .nav-link a {
   text-decoration: none;
   color: #d2efff;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   font-weight: 700;
   font-size: 13px;
 }
@@ -86,18 +103,67 @@ nav {
   outline-offset: 4px;
 }
 
-@media (max-width: 700px) {
+.menu-toggle {
+  display: none;
+  border: 0;
+  background: transparent;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.menu-toggle span {
+  display: block;
+  width: 24px;
+  height: 2px;
+  margin: 5px 0;
+  background: #d2efff;
+}
+
+@media (max-width: 900px) {
   nav {
     padding: 0 16px;
   }
-
-  .nav-link {
-    gap: 18px;
+  .menu-toggle {
+    display: block;
   }
-
-  .nav-link li:nth-child(2),
-  .nav-link li:nth-child(4) {
+  .nav-content {
     display: none;
+    position: absolute;
+    top: 64px;
+    left: 0;
+    right: 0;
+    padding: 18px 16px 20px;
+    flex-direction: column;
+    align-items: stretch;
+    background: #071a29;
+    box-shadow: 0 12px 24px rgba(7, 26, 41, 0.22);
+  }
+  .nav-content.open {
+    display: flex;
+  }
+  .nav-link {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+  .nav-link li {
+    width: 100%;
+  }
+  .nav-link a {
+    display: block;
+    padding: 12px 8px;
+  }
+  .nav-actions {
+    justify-content: stretch;
+  }
+  .nav-actions button {
+    flex: 1;
+  }
+}
+
+@media (max-width: 700px) {
+  nav {
+    padding: 0 16px;
   }
 
   .logo {

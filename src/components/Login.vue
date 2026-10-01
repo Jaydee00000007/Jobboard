@@ -185,7 +185,7 @@ p {
   text-decoration: none;
   color: #071a29;
 }
-@media (max-width: 700px) {
+@media (max-width: 900px) {
   .sign {
     width: 100%;
     box-sizing: border-box;

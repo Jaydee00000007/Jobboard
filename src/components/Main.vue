@@ -206,4 +206,47 @@ hr {
     font-size: 15px;
   }
 }
+
+@media (max-width: 900px) {
+  .main {
+    gap: 32px;
+    padding: 96px 24px 48px;
+  }
+
+  .main1,
+  .main2 {
+    flex-basis: 100%;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .main2 {
+    max-width: 560px;
+    margin-inline: auto;
+  }
+
+  h1 {
+    font-size: 40px;
+  }
+
+  .comp-info {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  .main {
+    gap: 24px;
+    padding: 88px 18px 36px;
+  }
+
+  h1 {
+    font-size: 34px;
+  }
+
+  .p2 {
+    font-size: 17px;
+  }
+}
 </style>

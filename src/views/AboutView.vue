@@ -187,15 +187,6 @@ export default {
 </script>
 
 <style>
-body {
-  margin: 0;
-  padding: 0;
-  width: 100%;
-  height: 100vh;
-  overflow-x: hidden;
-  box-sizing: border-box;
-}
-
 .Aboutpage {
   min-height: 100dvh;
   background-color: #071a29;
@@ -224,7 +215,8 @@ body {
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding-left: 50px;
+  padding: 120px 50px 40px;
+  box-sizing: border-box;
 
   .sub-head h3 {
     display: flex;
@@ -232,10 +224,10 @@ body {
     align-items: center;
     gap: 10px;
     margin: 0;
-    padding: 20px 0px 0px 0px;
+    padding: 0;
     font-weight: 350;
     font-size: 18px;
-    margin-top: 120px;
+    margin-top: 0;
     text-transform: uppercase;
   }
   .head h1 {
@@ -246,8 +238,8 @@ body {
     font-weight: Bolder;
     font-size: 40px;
     text-wrap: wrap;
-    width: 750px;
-    margin-top: none;
+    width: min(750px, 100%);
+    margin: 0;
   }
   .text-body p {
     display: flex;
@@ -256,8 +248,8 @@ body {
     font-weight: 400;
     font-size: 18px;
     text-wrap: wrap;
-    width: 750px;
-    margin-top: none;
+    width: min(750px, 100%);
+    margin: 0;
     padding-bottom: 50px;
   }
 }
@@ -272,10 +264,12 @@ body {
 
   ul {
     display: flex;
-    justify-content: start;
+    justify-content: space-around;
     align-items: start;
-    gap: 200px;
-    padding: 0px 55px;
+    flex-wrap: wrap;
+    gap: 24px 60px;
+    width: 100%;
+    padding: 20px 24px;
     list-style: none;
     color: #d2efff;
     font-family: 'Lato', sans-serif;
@@ -309,8 +303,9 @@ body {
   .board {
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 60px;
+    gap: 24px;
     align-items: center;
     padding: 80px 50px;
 
@@ -321,8 +316,13 @@ body {
       background-color: #d2efff;
       border: 1px solid #071a290e;
       border-radius: 25px;
-      width: 500px;
-      height: 250px;
+      flex: 1 1 300px;
+      width: min(100%, 500px);
+      max-width: 500px;
+      min-width: 0;
+      height: auto;
+      min-height: 250px;
+      box-sizing: border-box;
       padding: 30px;
       padding-top: 15px;
 
@@ -344,13 +344,16 @@ body {
   .area2 {
     display: flex;
     flex-direction: row;
-    gap: 70px;
-    padding-left: 50px;
+    flex-wrap: wrap;
+    gap: 32px;
+    padding: 0 50px;
 
     .area2-a {
       display: flex;
       flex-direction: column;
       gap: 0px;
+      flex: 1 1 320px;
+      min-width: 0;
 
       h3 {
         font-size: 35px;
@@ -362,7 +365,8 @@ body {
         font-weight: 400;
         margin: 0;
         text-wrap: wrap;
-        width: 600px;
+        width: 100%;
+        max-width: 600px;
       }
     }
     .area2-b {
@@ -373,7 +377,10 @@ body {
       background-color: #d2efff;
       gap: 10px;
       padding: 50px;
-      width: 40%;
+      flex: 1 1 320px;
+      width: auto;
+      min-width: 0;
+      box-sizing: border-box;
       border-radius: 15px;
 
       .verified-job {
@@ -381,13 +388,17 @@ body {
         justify-content: space-between;
         align-items: center;
         background-color: #f0faff;
-        width: 90%;
+        width: 100%;
+        box-sizing: border-box;
+        flex-wrap: wrap;
+        gap: 12px;
         padding: 20px;
         border: 0px solid #071a2928;
         border-radius: 20px;
 
         span {
-          text-wrap: nowrap;
+          min-width: 0;
+          text-wrap: wrap;
         }
 
         .second {
@@ -401,12 +412,13 @@ body {
 .contact {
   display: flex;
   flex-direction: row;
+  flex-wrap: wrap;
   justify-content: space-between;
+  gap: 40px;
   color: #d2efff;
-  padding: 0px 50px;
-  padding-bottom: 40px;
-  padding-top: 40px;
+  padding: 40px 50px;
   margin: 0;
+  box-sizing: border-box;
 
   .secA {
     display: flex;
@@ -427,7 +439,8 @@ body {
         font-weight: 300;
         margin: 0;
         text-wrap: wrap;
-        width: 550px;
+        width: 100%;
+        max-width: 550px;
       }
     }
 
@@ -450,6 +463,7 @@ body {
           border-radius: 50%;
           height: 40px;
           width: 40px;
+          flex: 0 0 40px;
           display: flex;
           justify-content: center;
           align-items: center;
@@ -481,7 +495,9 @@ body {
     display: flex;
     flex-direction: column;
     gap: 20px;
-    width: 50%;
+    flex: 1 1 360px;
+    width: auto;
+    min-width: 0;
 
     form {
       display: flex;
@@ -491,6 +507,7 @@ body {
       .top {
         display: flex;
         flex-direction: row;
+        flex-wrap: wrap;
         gap: 20px;
 
         .left,
@@ -498,7 +515,8 @@ body {
           display: flex;
           flex-direction: column;
           gap: 5px;
-          width: 100%;
+          flex: 1 1 200px;
+          min-width: 0;
         }
       }
 
@@ -511,6 +529,7 @@ body {
 
       input,
       textarea {
+        box-sizing: border-box;
         padding: 10px;
         border-radius: 5px;
         border: none;
@@ -530,237 +549,108 @@ body {
   }
 }
 
-/* Tablets and up */
-@media screen and (max-width: 767px) {
-  body {
-    font-size: 16px;
+@media (max-width: 900px) {
+  .Aboutpage .part-about {
+    padding: 100px 24px 36px;
+  }
+
+  .Aboutpage .partB-about ul {
+    gap: 24px 32px;
+    padding-inline: 24px;
+  }
+
+  .Aboutpage .partC-about .board {
+    padding: 56px 24px;
+  }
+
+  .Aboutpage .partC-about .area2 {
+    padding-inline: 24px;
+  }
+
+  .Aboutpage .partD-about.contact {
+    padding: 40px 24px;
   }
 }
 
-/* Desktops and up */
-@media screen and (max-width: 1200px) {
-  .partA {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    background-color: #d2efff;
-    padding-left: 100px;
-
-    .sub-head h3 {
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      gap: 10px;
-      margin: 0;
-      padding: 20px 0px 0px 0px;
-      font-weight: 350;
-      font-size: 20px;
-      margin-top: 120px;
-      text-transform: uppercase;
-    }
-    .head h1 {
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      gap: 10px;
-      font-weight: Bolder;
-      font-size: 60px;
-      text-wrap: wrap;
-      width: 1050px;
-      margin-top: none;
-    }
-    .text-body p {
-      display: flex;
-      justify-content: start;
-      align-items: center;
-      font-weight: 400;
-      font-size: 30px;
-      text-wrap: wrap;
-      width: 1200px;
-      margin-top: none;
-      padding-bottom: 50px;
-    }
+@media (max-width: 600px) {
+  .Aboutpage .part-about {
+    padding: 92px 18px 28px;
   }
 
-  .partB {
-    background-color: #071a29;
-    padding-bottom: 20px;
-
-    ul {
-      display: flex;
-      justify-content: start;
-      align-items: start;
-      gap: 200px;
-      padding: 0px 190px;
-      list-style: none;
-      color: #d2efff;
-      font-family: 'Lato', sans-serif;
-      font-weight: 700;
-      font-style: normal;
-      font-size: 13px;
-
-      li {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: start;
-        gap: 10px;
-
-        h3 {
-          font-size: 30px;
-          font-weight: bolder;
-        }
-        span {
-          font-size: 20px;
-          font-weight: lighter;
-        }
-      }
-    }
+  .Aboutpage .part-about .head h1 {
+    font-size: 34px;
   }
 
-  .partC {
-    background-color: #f0faff;
-    padding-bottom: 150px;
-
-    .board {
-      display: flex;
-      flex-direction: row;
-      justify-content: center;
-      gap: 100px;
-      align-items: center;
-      padding: 100px 50px;
-
-      .board-plate {
-        display: flex;
-        flex-direction: column;
-        justify-content: start;
-        border: 1px solid #071a290e;
-        border-radius: 25px;
-        width: 500px;
-        height: 250px;
-        padding: 30px;
-
-        span {
-        }
-        h4 {
-          font-size: 20px;
-          font-weight: bolder;
-        }
-        p {
-          font-size: 20px;
-          font-weight: light;
-          text-wrap: wrap;
-          margin: 0px;
-        }
-      }
-    }
-
-    .area2 {
-      display: flex;
-      flex-direction: row;
-      gap: 380px;
-      padding-left: 190px;
-
-      .area2-a {
-        display: flex;
-        flex-direction: column;
-        gap: 0px;
-
-        h3 {
-          font-size: 35px;
-          font-weight: 550;
-          margin: 0;
-        }
-        p {
-          font-size: 20px;
-          font-weight: 400;
-          margin: 0;
-          text-wrap: wrap;
-          width: 750px;
-        }
-      }
-      .area2-b {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        background-color: #d2efff;
-        gap: 10px;
-        padding: 50px;
-        width: 30%;
-        border-radius: 15px;
-
-        .verified-job {
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          background-color: #f0faff;
-          width: 90%;
-          padding: 20px;
-          border: 0px solid #071a2928;
-          border-radius: 20px;
-
-          span {
-            text-wrap: nowrap;
-          }
-
-          .second {
-            font-weight: lighter;
-          }
-        }
-      }
-    }
+  .Aboutpage .part-about .text-body p {
+    font-size: 16px;
+    padding-bottom: 28px;
   }
 
-  .contact {
-    display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    color: #d2efff;
-    padding: 0px 190px;
-    padding-bottom: 60px;
-    padding-top: 60px;
+  .Aboutpage .partB-about ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px 12px;
     margin: 0;
+    padding: 20px 18px;
+  }
 
-    .secA {
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
+  .Aboutpage .partB-about li h3 {
+    margin: 0;
+    font-size: 24px;
+  }
 
-      .contact-top {
-        display: flex;
-        flex-direction: column;
-        gap: 20px;
-        h2 {
-          font-size: 35px;
-          font-weight: 550;
-          margin: 0;
-        }
-        p {
-          font-size: 20px;
-          font-weight: 300;
-          margin: 0;
-          text-wrap: wrap;
-          width: 600px;
-        }
-      }
+  .Aboutpage .partB-about li span {
+    font-size: 14px;
+  }
 
-      .sub-contact {
-        display: flex;
-        flex-direction: column;
-        gap: 0px;
-        padding: 0;
-        margin: 0;
+  .Aboutpage .partC-about .board {
+    padding: 40px 18px;
+  }
 
-        .c-one {
-          display: flex;
-          flex-direction: row;
-          gap: 0px;
-          padding: 0;
-          margin: 0;
-        }
-      }
-    }
+  .Aboutpage .partC-about .board-plate {
+    flex-basis: 100%;
+    min-height: 0;
+    padding: 24px;
+  }
+
+  .Aboutpage .partC-about .board-plate h4 {
+    font-size: 18px;
+  }
+
+  .Aboutpage .partC-about .board-plate p {
+    font-size: 16px;
+  }
+
+  .Aboutpage .partC-about .area2 {
+    padding-inline: 18px;
+  }
+
+  .Aboutpage .partC-about .area2-a h3 {
+    font-size: 28px;
+  }
+
+  .Aboutpage .partC-about .area2-b {
+    padding: 18px;
+  }
+
+  .Aboutpage .partC-about .verified-job {
+    padding: 14px;
+  }
+
+  .Aboutpage .partD-about.contact {
+    padding: 32px 18px;
+  }
+
+  .Aboutpage .partD-about .contact-top h2 {
+    font-size: 28px;
+  }
+
+  .Aboutpage .partD-about .contact-top p {
+    font-size: 16px;
+  }
+
+  .Aboutpage .partD-about .secB .top {
+    flex-direction: column;
   }
 }
 </style>

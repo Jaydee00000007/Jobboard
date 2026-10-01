@@ -44,7 +44,7 @@
             </div>
             <div class="overview-content">
               <div class="partA">
-                <h3>Welcome back, {{ userProfile.name.split(" ")[0] }}</h3>
+                <h3>Welcome back, {{ userProfile.name.split(' ')[0] }}</h3>
                 <p>Here’s what’s happening with your job search right now.</p>
               </div>
               <div class="partB">
@@ -59,9 +59,7 @@
                   <table class="table t1">
                     <thead>
                       <tr>
-                        <th>Recent applications</th>
-                        <th></th>
-                        <th></th>
+                        <th colspan="3">Recent applications</th>
                         <th>
                           <button
                             type="button"
@@ -81,10 +79,10 @@
                     </thead>
                     <tbody>
                       <tr v-for="application in recentApplications" :key="application.role">
-                        <td scope="row">{{ application.role }}</td>
-                        <td>{{ application.company }}</td>
-                        <td>{{ application.status }}</td>
-                        <td>{{ application.date }}</td>
+                        <td scope="row" data-label="Role">{{ application.role }}</td>
+                        <td data-label="Company">{{ application.company }}</td>
+                        <td data-label="Status">{{ application.status }}</td>
+                        <td data-label="Applied">{{ application.date }}</td>
                       </tr>
                     </tbody>
                   </table>
@@ -105,7 +103,7 @@
                         </th>
                       </tr>
                     </thead>
-                    <tbody>
+                    <tbody v-if="notifications.length">
                       <tr v-for="notification in notifications" :key="notification.id">
                         <td class="notiv" scope="row">
                           <div class="status-icon">
@@ -147,6 +145,31 @@
                           >
                             {{ notification.read ? 'Read' : 'Mark read' }}
                           </button>
+                        </td>
+                      </tr>
+                    </tbody>
+                    <tbody v-else>
+                      <tr>
+                        <td colspan="2" class="empty-notifications">
+                          <div class="empty-notifications-state" role="status">
+                            <span class="empty-notifications-icon" aria-hidden="true">
+                              <svg
+                                xmlns="http://www.w3.org/2000/svg"
+                                viewBox="0 0 24 24"
+                                width="22"
+                                height="22"
+                                fill="none"
+                                stroke="currentColor"
+                                stroke-width="1.8"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                              >
+                                <rect x="3" y="5" width="18" height="14" rx="2" />
+                                <path d="m3 7 9 6 9-6" />
+                              </svg>
+                            </span>
+                            <span>No messages available.</span>
+                          </div>
                         </td>
                       </tr>
                     </tbody>
@@ -423,12 +446,13 @@ const settings = computed(() => store.settings)
 const skills = computed(() => store.skills)
 const overviewStats = computed(() => store.overviewStats)
 const recentApplications = computed(() => store.recentApplications)
-const applicationFilters = computed(() =>
-  store.applicationFilters as Array<{
-    id: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected'
-    label: string
-    count: number
-  }>,
+const applicationFilters = computed(
+  () =>
+    store.applicationFilters as Array<{
+      id: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected'
+      label: string
+      count: number
+    }>,
 )
 const filteredApplications = computed(() => store.filteredApplications)
 const selectedMessage = computed(() => store.selectedMessage)
@@ -437,18 +461,38 @@ const allNotificationsRead = computed(() => store.allNotificationsRead)
 const userProfile = computed(() => store.userProfile)
 const profileInitials = computed(() => userProfile.value.initials || 'AO')
 
-function setActiveTab(tab: DashboardTab) { store.setActiveTab(tab) }
-function handleTabSelect(tab: DashboardTab) { setActiveTab(tab) }
-function handleSavedJobToggle(jobId: number) { store.toggleSavedJob(jobId) }
-function handleSettingsUpdate() { store.updateSettings(settings.value) }
-function toggleApplicationFilter(filter: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected') {
+function setActiveTab(tab: DashboardTab) {
+  store.setActiveTab(tab)
+}
+function handleTabSelect(tab: DashboardTab) {
+  setActiveTab(tab)
+}
+function handleSavedJobToggle(jobId: number) {
+  store.toggleSavedJob(jobId)
+}
+function handleSettingsUpdate() {
+  store.updateSettings(settings.value)
+}
+function toggleApplicationFilter(
+  filter: 'all' | 'interview' | 'under-review' | 'offer' | 'not-selected',
+) {
   store.toggleApplicationFilter(filter)
 }
-function toggleNotificationRead(id: number) { store.toggleNotificationRead(id) }
-function markAllNotificationsRead() { store.markAllNotificationsRead() }
-function replyToMessage() { store.replyToMessage() }
-function toggleSkill(id: number) { store.toggleSkill(id) }
-function selectMessage(id: number) { store.selectMessage(id) }
+function toggleNotificationRead(id: number) {
+  store.toggleNotificationRead(id)
+}
+function markAllNotificationsRead() {
+  store.markAllNotificationsRead()
+}
+function replyToMessage() {
+  store.replyToMessage()
+}
+function toggleSkill(id: number) {
+  store.toggleSkill(id)
+}
+function selectMessage(id: number) {
+  store.selectMessage(id)
+}
 function signOut() {
   store.signOut()
   router.replace({ name: 'home' })
@@ -466,7 +510,6 @@ body {
   padding: 0;
   width: 100%;
   min-height: 100%;
-  overflow-x: hidden;
   background: #071a29;
   font-family: Inter, 'Segoe UI', Arial, sans-serif;
   color: #0f172a;
@@ -507,7 +550,7 @@ body {
   padding-top: 90px;
 }
 
-.sectionA .d-flex {
+.sectionA > .d-flex {
   display: flex;
   gap: 1.25rem;
   width: 100%;
@@ -571,7 +614,7 @@ body {
   width: auto;
   background: transparent;
   min-height: calc(100vh - 110px);
-  padding: 22px 24px 40px;
+  padding: 5px 24px 40px;
 }
 
 .overview-header {
@@ -674,6 +717,14 @@ body {
   overflow: hidden;
 }
 
+.overview-content .partC2 {
+  align-self: start;
+}
+
+.overview-content .partC1 {
+  align-self: start;
+}
+
 .overview-content .partC table {
   width: 100%;
   border: none;
@@ -695,6 +746,35 @@ body {
   border-top: 1px solid rgba(15, 23, 42, 0.06);
   color: #0f172a;
   font-size: 0.94rem;
+}
+
+.overview-content .partC tbody td.empty-notifications {
+  padding: 20px 16px;
+  text-align: center;
+  background: rgba(20, 134, 105, 0.035);
+}
+
+.empty-notifications-state {
+  display: flex;
+  min-height: 92px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  color: rgba(15, 23, 42, 0.68);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.empty-notifications-icon {
+  display: grid;
+  width: 42px;
+  height: 42px;
+  place-items: center;
+  border: 1px solid rgba(20, 134, 105, 0.12);
+  border-radius: 12px;
+  background: rgba(20, 134, 105, 0.08);
+  color: #148669;
 }
 
 .overview-content .partC .notiv {
@@ -1322,8 +1402,9 @@ input:checked + .slider:before {
     padding-top: 70px;
   }
 
-  .sectionA .d-flex {
+  .sectionA > .d-flex {
     flex-direction: column;
+    align-items: stretch;
   }
 
   .sectionA .navbar {
@@ -1347,6 +1428,7 @@ input:checked + .slider:before {
 
   .sectionA .page-content {
     padding: 16px;
+    width: 100%;
   }
 
   .app-section {
@@ -1394,6 +1476,63 @@ input:checked + .slider:before {
     gap: 10px;
   }
 
+  .overview-content .partC table.t1,
+  .overview-content .partC .t1 thead,
+  .overview-content .partC .t1 tbody {
+    display: block;
+    width: 100%;
+  }
+
+  .overview-content .partC .t1 thead tr:first-child {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .overview-content .partC .t1 thead tr:first-child th:first-child {
+    flex: 1;
+  }
+
+  .overview-content .partC .t1 thead tr:first-child th:last-child {
+    white-space: nowrap;
+  }
+
+  .overview-content .partC .t1 thead tr:nth-child(2) {
+    display: none;
+  }
+
+  .overview-content .partC .t1 tbody tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px 12px;
+    padding: 12px 16px;
+    border-top: 1px solid rgba(15, 23, 42, 0.06);
+  }
+
+  .overview-content .partC .t1 tbody td {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+    font-size: 0.82rem;
+  }
+
+  .overview-content .partC .t1 tbody td::before {
+    content: attr(data-label);
+    color: rgba(15, 23, 42, 0.58);
+    font-size: 0.64rem;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .overview-content .partC .t1 tbody td:first-child {
+    grid-column: 1 / -1;
+    font-size: 0.92rem;
+    font-weight: 700;
+  }
+
   .message-preview,
   .savedjob-tiles,
   .profile-section .profile-content {
@@ -1414,6 +1553,11 @@ input:checked + .slider:before {
   font-size: 0.75rem;
   cursor: pointer;
 }
-.sign-out-btn:hover { background: rgba(255, 255, 255, 0.08); }
-.sign-out-btn:focus-visible { outline: 2px solid #36d2ff; outline-offset: 2px; }
+.sign-out-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+.sign-out-btn:focus-visible {
+  outline: 2px solid #36d2ff;
+  outline-offset: 2px;
+}
 </style>

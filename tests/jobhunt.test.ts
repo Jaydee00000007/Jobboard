@@ -74,6 +74,23 @@ describe('jobhunt store', () => {
     expect(store.notifications[0].message).toContain(job.title)
   })
 
+  it('reflects the applied job in the dashboard overview state', () => {
+    const store = useJobhuntStore()
+    const job = jobs[1]
+
+    expect(store.recentApplications[0].role).not.toBe(job.title)
+
+    store.applyForJob(job)
+
+    expect(store.applications[0]).toMatchObject({
+      role: job.title,
+      company: job.company,
+      status: 'Under review',
+    })
+    expect(store.recentApplications[0].role).toBe(job.title)
+    expect(store.overviewStats[0].value).toBe(store.applications.length)
+  })
+
   it('registers an account and signs in with its saved credentials', async () => {
     const store = useJobhuntStore()
     const credentials = {
@@ -124,5 +141,17 @@ describe('jobhunt store', () => {
     store.markAllNotificationsRead()
 
     expect(store.allNotificationsRead).toBe(true)
+    expect(store.notifications).toHaveLength(0)
+  })
+
+  it('removes a notification immediately when it is marked read', () => {
+    const store = useJobhuntStore()
+
+    expect(store.notifications).toHaveLength(3)
+
+    store.toggleNotificationRead(store.notifications[0].id)
+
+    expect(store.notifications).toHaveLength(2)
+    expect(store.notifications.some((notification) => notification.id === 1)).toBe(false)
   })
 })

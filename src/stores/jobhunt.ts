@@ -195,7 +195,7 @@ export const useJobhuntStore = defineStore(
       },
     ])
 
-    const recentApplications = computed(() => applications.value.slice(0, 4))
+    const recentApplications = computed(() => applications.value.slice(0, 2))
     const applicationFilters = computed(() => [
       { id: 'all', label: 'All', count: applications.value.length },
       {
@@ -280,19 +280,14 @@ export const useJobhuntStore = defineStore(
     }
 
     function toggleNotificationRead(id: number) {
-      notifications.value = notifications.value.map((notification) =>
-        notification.id === id ? { ...notification, read: true } : notification,
-      )
+      notifications.value = notifications.value.filter((notification) => notification.id !== id)
     }
 
     function selectMessage(id: number) {
       activeMessageId.value = id
     }
     function markAllNotificationsRead() {
-      notifications.value = notifications.value.map((notification) => ({
-        ...notification,
-        read: true,
-      }))
+      notifications.value = []
     }
     function replyToMessage() {
       replyStatus.value = `Draft reply ready for ${selectedMessage.value.company}.`

@@ -1,22 +1,12 @@
 <template>
-  <section class="company-search">
+  <section class="faq-search">
     <input
       v-model="modelSearch"
       type="text"
-      placeholder="Search by company name or industry"
-      aria-label="Search companies"
+      placeholder="Search FAQs"
+      aria-label="Search FAQs"
       @input="$emit('update:search', modelSearch)"
     />
-    <div class="location-wrap">
-      <input
-        v-model="modelLocation"
-        type="text"
-        placeholder="Location e.g. Lagos"
-        aria-label="Search companies by location"
-        @input="$emit('update:location', modelLocation)"
-      />
-      <button type="button" class="search" @click="$emit('search')">Search</button>
-    </div>
   </section>
 </template>
 
@@ -25,10 +15,9 @@ import { ref, watch } from 'vue'
 
 const props = defineProps({
   search: { type: String, default: '' },
-  location: { type: String, default: '' },
 })
 
-defineEmits(['update:search', 'update:location', 'search'])
+defineEmits(['update:search', 'update:locationfaq', 'search'])
 
 const modelSearch = ref(props.search)
 const modelLocation = ref(props.location)
@@ -48,7 +37,7 @@ watch(
 </script>
 
 <style scoped>
-.company-search {
+.faq-search {
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -60,33 +49,26 @@ watch(
   border-radius: 15px;
   box-sizing: border-box;
 }
-.company-search > input,
-.location-wrap input {
+.faq-search > input {
   min-width: 0;
   height: 42px;
   border: 0;
   padding: 0 16px;
   font-size: 15px;
 }
-.company-search > input {
+.faq-search > input {
   flex: 1;
 }
-.location-wrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  flex: 1;
-  border-left: 1px solid #071a29;
-}
-.location-wrap input {
-  flex: 1;
+.faq-search input:focus {
+  outline: none;
 }
 .company-search input:focus {
   outline: none;
 }
 .company-search input:focus-visible,
 .search:focus-visible {
-  outline: none;
+  outline: 2px solid #36d2ff;
+  outline-offset: 2px;
 }
 .search {
   background: orange;
