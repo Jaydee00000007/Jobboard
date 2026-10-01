@@ -248,17 +248,18 @@ describe('jobhunt store', () => {
     store.markAllNotificationsRead()
 
     expect(store.allNotificationsRead).toBe(true)
-    expect(store.notifications).toHaveLength(0)
+    expect(store.notifications).toHaveLength(3)
+    expect(store.notifications.every((notification) => notification.read)).toBe(true)
   })
 
-  it('removes a notification immediately when it is marked read', () => {
+  it('marks a single notification as read without removing it', () => {
     const store = useJobhuntStore()
 
-    expect(store.notifications).toHaveLength(3)
+    expect(store.notifications[0].read).toBe(false)
 
     store.toggleNotificationRead(store.notifications[0].id)
 
-    expect(store.notifications).toHaveLength(2)
-    expect(store.notifications.some((notification) => notification.id === 1)).toBe(false)
+    expect(store.notifications).toHaveLength(3)
+    expect(store.notifications[0]).toMatchObject({ id: 1, read: true })
   })
 })
