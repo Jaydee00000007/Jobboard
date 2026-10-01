@@ -5,20 +5,18 @@ import tsParser from '@typescript-eslint/parser'
 
 export default [
   {
-    ignores: ['dist/**', 'node_modules/**']
+    ignores: ['dist/**', 'node_modules/**'],
   },
   js.configs.recommended,
   ...vue.configs['flat/recommended'],
   {
-    files: ['**/*.{js,ts,vue}'],
+    files: ['**/*.{ts,vue}'],
     languageOptions: {
+      parser: tsParser,
       globals: {
         ...globals.browser,
-        ...globals.node
+        ...globals.node,
       },
-      parserOptions: {
-        parser: tsParser
-      }
     },
     rules: {
       'vue/multi-word-component-names': 'off',
@@ -33,7 +31,19 @@ export default [
       'vue/singleline-html-element-content-newline': 'off',
       'vue/multiline-html-element-content-newline': 'off',
       'vue/component-definition-name-casing': 'off',
-      'vue/html-closing-bracket-newline': 'off'
-    }
-  }
+      'vue/html-closing-bracket-newline': 'off',
+    },
+  },
+  {
+    files: ['**/*.js'],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-unused-vars': 'warn',
+    },
+  },
 ]
