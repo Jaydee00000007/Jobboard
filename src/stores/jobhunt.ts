@@ -449,7 +449,7 @@ export const useJobhuntStore = defineStore(
     }
 
     function applyForJob(job: Job) {
-      if (isJobApplied(job.id)) return
+      if (!isAuthenticated.value || isJobApplied(job.id)) return false
 
       applications.value.unshift({
         jobId: job.id,
@@ -465,6 +465,8 @@ export const useJobhuntStore = defineStore(
         type: 'success',
         read: false,
       })
+
+      return true
     }
 
     return {
