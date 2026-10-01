@@ -10,9 +10,24 @@ export default [
   js.configs.recommended,
   ...vue.configs['flat/recommended'],
   {
-    files: ['**/*.{ts,vue}'],
+    files: ['**/*.ts'],
     languageOptions: {
       parser: tsParser,
+      globals: {
+        ...globals.browser,
+        ...globals.node,
+      },
+    },
+    rules: {
+      'no-unused-vars': 'warn',
+    },
+  },
+  {
+    files: ['**/*.vue'],
+    languageOptions: {
+      parserOptions: {
+        parser: tsParser,
+      },
       globals: {
         ...globals.browser,
         ...globals.node,
