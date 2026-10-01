@@ -89,7 +89,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue'
-import { useRoute } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { useJobhuntStore } from '../stores/jobhunt'
 import HeaderB from '../components/HeaderB.vue'
 import Footer from '../components/Footer.vue'
@@ -101,6 +101,7 @@ import type { ExperienceLevel, Job, JobType, SalaryRank } from '../types/job'
 
 const store = useJobhuntStore()
 const route = useRoute()
+const router = useRouter()
 
 const searchQuery = ref('')
 const locationQuery = ref('')
@@ -192,6 +193,14 @@ function toggleSavedJob(job: Job) {
 }
 
 function applyForJob(job: Job) {
+  if (!store.isAuthenticated) {
+    router.push({
+      name: 'home',
+      query: { redirect: `/jobs?jobId=${job.id}` },
+    })
+    return
+  }
+
   store.applyForJob(job)
 }
 
