@@ -29,7 +29,9 @@
         :aria-describedby="errors.password ? 'login-password-error' : undefined"
         @blur="validatePassword"
       />
-      <small v-if="errors.password" id="login-password-error" class="error">{{ errors.password }}</small>
+      <small v-if="errors.password" id="login-password-error" class="error">{{
+        errors.password
+      }}</small>
 
       <p v-if="submitError" class="error" role="alert">{{ submitError }}</p>
 
@@ -53,13 +55,14 @@
 
 <script setup lang="ts">
 import { reactive, ref } from 'vue'
+import type { AuthPayload } from '../types/store'
 
-defineProps({
-  loading: { type: Boolean, default: false },
-  submitError: { type: String, default: '' },
-})
+defineProps<{ loading?: boolean; submitError?: string }>()
 
-const emit = defineEmits(['switch', 'submit'])
+const emit = defineEmits<{
+  switch: []
+  submit: [payload: Pick<AuthPayload, 'email' | 'password'>]
+}>()
 
 const email = ref('')
 const password = ref('')
@@ -85,8 +88,9 @@ function validatePassword() {
 }
 
 function handleSubmit() {
-  const valid = validateEmail() && validatePassword()
-  if (!valid) return
+  const validEmail = validateEmail()
+  const validPassword = validatePassword()
+  if (!(validEmail && validPassword)) return
 
   emit('submit', {
     email: email.value,
@@ -105,40 +109,90 @@ function handleSubmit() {
   height: auto;
   min-height: 100%;
 }
-.info { display: flex; flex-direction: column; gap: 10px; }
-label { color: #d2efff; font-family: "Lato", sans-serif; font-weight: 900; font-size: 15px; }
-input, select {
+.info {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+label {
+  color: #d2efff;
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 15px;
+}
+input,
+select {
   background-color: transparent;
   color: #071a29;
   padding: 10px;
   border-radius: 15px;
   border: none;
   border-bottom: 0.5px solid #d2efff;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   font-size: 14px;
   font-weight: 500;
 }
-input:focus, select:focus { outline: 2px solid #071a29; outline-offset: 2px; }
+input:focus,
+select:focus {
+  outline: 2px solid #071a29;
+  outline-offset: 2px;
+}
 button {
   padding: 10px;
   border-radius: 25px;
   border: none;
   background-color: #071a29;
   color: #fff;
-  font-family: "Lato", sans-serif;
+  font-family: 'Lato', sans-serif;
   font-size: 17px;
   font-weight: 900;
   cursor: pointer;
 }
-button:disabled { opacity: 0.6; cursor: not-allowed; }
-h2 { color: #d2efff; font-family: "Lato", sans-serif; font-weight: 900; font-size: 50px; }
-h3 { color: #d2efff; font-family: "Lato", sans-serif; font-weight: 900; font-size: 30px; }
-p { color: rgba(238, 238, 238, 0.815); }
-.error { color: #7a0b0b; font-size: 13px; margin: 0; }
-.btom { display: flex; justify-content: center; align-items: center; gap: 5px; font-family: "Lato", sans-serif; font-size: 15px; font-weight: 700; }
-.log a { text-decoration: none; color: #071a29; }
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+h2 {
+  color: #d2efff;
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 50px;
+}
+h3 {
+  color: #d2efff;
+  font-family: 'Lato', sans-serif;
+  font-weight: 900;
+  font-size: 30px;
+}
+p {
+  color: rgba(238, 238, 238, 0.815);
+}
+.error {
+  color: #7a0b0b;
+  font-size: 13px;
+  margin: 0;
+}
+.btom {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  font-family: 'Lato', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+}
+.log a {
+  text-decoration: none;
+  color: #071a29;
+}
 @media (max-width: 700px) {
-  .sign { width: 100%; box-sizing: border-box; padding: 40px 24px; }
-  h2 { font-size: 36px; }
+  .sign {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 40px 24px;
+  }
+  h2 {
+    font-size: 36px;
+  }
 }
 </style>

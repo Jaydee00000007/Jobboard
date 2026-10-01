@@ -74,19 +74,46 @@ describe('jobhunt store', () => {
     expect(store.notifications[0].message).toContain(job.title)
   })
 
-  it('updates the user profile when signing in', () => {
+  it('registers an account and signs in with its saved credentials', async () => {
     const store = useJobhuntStore()
-
-    store.signIn({
+    const credentials = {
       name: 'John Doe',
       email: 'john@example.com',
       password: 'password123',
-    })
+      skill: 'Product design',
+    }
+
+    expect(await store.signUp(credentials)).toBe(true)
+    expect(localStorage.getItem('jobhunt.accounts')).not.toContain(credentials.password)
+
+    store.signOut()
+    expect(await store.signIn(credentials)).toBe(true)
 
     expect(store.isAuthenticated).toBe(true)
     expect(store.userProfile.name).toBe('John Doe')
     expect(store.userProfile.email).toBe('john@example.com')
+    expect(store.userProfile.skill).toBe('Product design')
     expect(store.userProfile.initials).toBe('JD')
+    expect(store.userProfile).not.toHaveProperty('password')
+  })
+
+  it('rejects unknown accounts and incorrect passwords', async () => {
+    const store = useJobhuntStore()
+
+    expect(await store.signIn({ email: 'missing@example.com', password: 'password123' })).toBe(
+      false,
+    )
+    expect(store.isAuthenticated).toBe(false)
+
+    await store.signUp({
+      name: 'John Doe',
+      email: 'john@example.com',
+      password: 'password123',
+    })
+    store.signOut()
+
+    expect(await store.signIn({ email: 'john@example.com', password: 'wrongpassword' })).toBe(false)
+    expect(store.isAuthenticated).toBe(false)
   })
 
   it('marks all notifications as read', () => {
