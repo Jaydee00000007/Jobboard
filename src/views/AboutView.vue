@@ -150,23 +150,23 @@
           <div class="top">
             <div class="left">
               <label for="fullname">Full name</label>
-              <input placeholder="Your name" />
+              <input id="fullname" name="fullname" autocomplete="name" placeholder="Your name" />
             </div>
             <div class="right">
               <label for="email">Email address</label>
-              <input placeholder="you@email.com" />
+              <input id="email" name="email" type="email" autocomplete="email" placeholder="you@email.com" />
             </div>
           </div>
           <div class="subjectp">
             <label for="subject">Subject</label>
-            <input placeholder="What's this about?" />
+            <input id="subject" name="subject" placeholder="What's this about?" />
           </div>
           <div class="messagep">
             <label for="message">Message</label>
 <<<<<<< HEAD
             <textarea placeholder="Tell us more..."></textarea>
 =======
-            <textarea placeholder="What's this about?"></textarea>
+            <textarea id="message" name="message" rows="6" placeholder="Tell us how we can help."></textarea>
 >>>>>>> 5d1d9cbea6538cd40f31a5e454cf118c7684fb50
           </div>
           <button>Send message</button>
@@ -653,12 +653,23 @@ export default {
     font-size: 16px;
   }
 
+  .Aboutpage .partD-about .secB {
+    width: 100%;
+  }
+
+  .Aboutpage .partD-about .secB form {
+    width: 100%;
+    gap: 16px;
+  }
+
   .Aboutpage .partD-about .secB .top {
     display: flex;
     flex-direction: column;
-    padding-top: none;    
+    gap: 16px;
+    padding-top: 0;
   }
 
+<<<<<<< HEAD
    .Aboutpage .partD-about .secB .messagep {
    height: 100%;
   }
@@ -681,7 +692,34 @@ export default {
           height: 100px;
         }
       }
-    }
+      }
+=======
+  .Aboutpage .partD-about .secB .left,
+  .Aboutpage .partD-about .secB .right,
+  .Aboutpage .partD-about .secB .subjectp,
+  .Aboutpage .partD-about .secB .messagep {
+    width: 100%;
+    min-width: 0;
+    box-sizing: border-box;
+    gap: 6px;
+  }
+
+  .Aboutpage .partD-about .secB input,
+  .Aboutpage .partD-about .secB textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 0;
+  }
+
+  .Aboutpage .partD-about .secB textarea {
+    min-height: 140px;
+    resize: vertical;
+  }
+
+  .Aboutpage .partD-about .secB button {
+    width: 100%;
+>>>>>>> 5d1d9cbea6538cd40f31a5e454cf118c7684fb50
   }
 }
 </style>
