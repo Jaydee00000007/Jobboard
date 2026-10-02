@@ -163,7 +163,7 @@
           </div>
           <div class="messagep">
             <label for="message">Message</label>
-            <textarea placeholder="What's this about?"></textarea>
+            <textarea placeholder="Tell us more..."></textarea>
           </div>
           <button>Send message</button>
         </form>
@@ -657,7 +657,27 @@ export default {
 
    .Aboutpage .partD-about .secB .messagep {
    height: 100%;
-    
+  }
+
+  .secB{
+    form{
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+
+      .top{
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        gap: 0px;
+        padding: 0px;
+      }
+      .messagep{
+        textarea{
+          height: 100px;
+        }
+      }
+      }
   }
 }
 </style>

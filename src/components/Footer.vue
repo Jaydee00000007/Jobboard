@@ -1,51 +1,54 @@
 <template>
   <div class="footer">
-    <div class="logo">
-      <img src="../images/logo.svg" alt="Job Hunt logo" />
-    </div>
     <div class="footer-sec1">
       <div class="footers">
         <div class="footerst">
-          <ul>
-            <li><RouterLink to="/jobs">Browse jobs</RouterLink></li>
-            <li><RouterLink to="/about">Job categories</RouterLink></li>
-            <li><RouterLink to="/contact">Post vacancy</RouterLink></li>
-          </ul>
+            <div class="logo">
+              <img src="../images/logo.svg" alt="Job Hunt logo" />
+            </div>
         </div>
         <div class="footerst">
           <ul>
             <li><RouterLink to="/jobs">Browse jobs</RouterLink></li>
             <li><RouterLink to="/companies">Companies</RouterLink></li>
-            <li><RouterLink to="/contact">Verified</RouterLink></li>
+            <li><RouterLink to="/contact">Company Verification</RouterLink></li>
           </ul>
         </div>
         <div class="footerst">
           <ul>
+            <li><RouterLink to="/contact">Post vacancy</RouterLink></li>
             <li><RouterLink to="/faq">FAQ</RouterLink></li>
             <li><RouterLink to="/about">About us</RouterLink></li>
-            <li><RouterLink to="/contact">Contact us</RouterLink></li>
           </ul>
         </div>
       </div>
       <div class="lets-talk">
-        <p>Get a question?<span>Let's Talk</span></p>
+        <p>Get a question?<span class="talk"><RouterLink :to="{ path: '/jobs', hash: '#categorieslink' }">Let's talk</RouterLink></span></p>
       </div>
     </div>
     <hr />
     <div class="footer-sec2">
       <div class="footerlist">
-        <ul>
-          <li><a href="#">Cookies policy</a></li>
-          <li><a href="#">Legal terms</a></li>
-          <li><a href="#">Privacy policy</a></li>
-        </ul>
+        <div class="c-four sociallink">
+            <div class="ico1">
+              <a href="#" target="_blank">
+                <font-awesome-icon :icon="['fab', 'facebook-f']" />
+              </a>
+            </div>
+            <div class="ico1">
+              <a href="#" target="_blank">
+                <font-awesome-icon :icon="['fab', 'twitter']" />
+              </a>
+            </div>
+            <div class="ico1">
+              <a href="#" target="_blank">
+                <font-awesome-icon :icon="['fab', 'linkedin-in']" />
+              </a>
+            </div>
+        </div>
       </div>
       <div class="footerlist">
-        <ul>
-          <li><a href="#">Cookies policy</a></li>
-          <li><a href="#">Legal terms</a></li>
-          <li><a href="#">Privacy policy</a></li>
-        </ul>
+        <p class="copy">© 2024 Job Board. All rights reserved.</p>
       </div>
       <div class="footerlist">
         <ul>
@@ -55,7 +58,6 @@
         </ul>
       </div>
     </div>
-    <p class="copy">© 2024 Job Board. All rights reserved.</p>
   </div>
 </template>
 
@@ -76,6 +78,26 @@
   min-width: 0;
 }
 
+.sociallink {
+        display: flex;
+        flex-direction: row;
+        gap: 35px;
+        padding: 0;
+        margin: 0;
+
+        .ico1 {
+          height: 40px;
+          width: 40px;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+        .ico1 a {
+          color:  #071a29;
+          text-decoration: none;
+        }
+      }
+
 a,
 li {
   text-decoration: none;
@@ -84,9 +106,10 @@ li {
 }
 
 .logo img {
-  width: 80px;
+  width: 120px;
   height: auto;
 }
+
 
 .footers,
 .footer-sec1 {
@@ -102,6 +125,7 @@ li {
 .footer-sec1 {
   width: 100%;
   padding: 0 5px;
+  padding-right: 230px;
 }
 
 .footer-sec2,
@@ -110,7 +134,6 @@ li {
   flex-direction: row;
   align-items: center;
   gap: 15px;
-  padding: 0 10px;
   text-align: center;
   margin: 0;
   width: 100%;
@@ -129,6 +152,7 @@ hr {
   font-size: clamp(2rem, 5vw, 3.75rem);
   line-height: 1;
   padding: 0;
+  text-wrap: nowrap;
 }
 
 .copy {
@@ -172,13 +196,17 @@ hr {
 
   .footerst,
   .footerlist {
-    align-items: flex-start;
+    align-items: center;
     min-width: 0;
   }
 
   .footerlist ul {
     flex-wrap: wrap;
     text-align: left;
+  }
+
+  .footer{
+    display: none;
   }
 }
 </style>
