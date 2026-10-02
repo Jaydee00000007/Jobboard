@@ -1403,6 +1403,27 @@ body {
   box-shadow: 0 10px 20px rgba(20, 134, 195, 0.28);
 }
 
+.signout{
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
+
+  .sign-out-btn,
+  .appearance-toggle{
+    width: 30px;
+    text-align: center;
+    text-wrap: wrap;
+    font-size: 12px;
+  }
+  .appearance-toggle{
+    margin-top: 12px;
+    font-size: 10px;
+  }
+
+}
+
 .sectionA .page-content {
   flex: 1;
   min-width: 0;
