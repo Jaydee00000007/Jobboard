@@ -1,23 +1,27 @@
 <template>
-  <section class="job-search">
-    <input
-      v-model="modelSearch"
-      type="text"
-      placeholder="Job title or keyword — e.g. Product Designer"
-      aria-label="Search jobs by title or keyword"
-      @input="$emit('update:search', modelSearch)"
-    />
-    <div class="location-wrap">
-      <input
-        v-model="modelLocation"
-        type="text"
-        placeholder="Location e.g. Lagos"
-        aria-label="Search jobs by location"
-        @input="$emit('update:location', modelLocation)"
-      />
-      <button type="button" class="search" @click="$emit('search')">Search</button>
-    </div>
-  </section>
+      <section class="job-search">
+          <div class="search-space">
+              <div class="job-wrap">
+                  <input
+                    v-model="modelSearch"
+                    type="text"
+                    placeholder="Job title or keyword — e.g. Product Designer"
+                    aria-label="Search jobs by title or keyword"
+                    @input="$emit('update:search', modelSearch)"
+                  />
+              </div>
+              <div class="location-wrap">
+                <input
+                  v-model="modelLocation"
+                  type="text"
+                  placeholder="Location e.g. Lagos"
+                  aria-label="Search jobs by location"
+                  @input="$emit('update:location', modelLocation)"
+                />
+              </div>
+        </div>
+          <button type="button" class="search" @click="$emit('search')">Search</button>
+      </section>
 </template>
 
 <script setup>
@@ -79,10 +83,25 @@ watch(() => props.location, (value) => { modelLocation.value = value })
   cursor: pointer;
 }
 @media (max-width: 700px) {
-  .job-search { flex-direction: column; align-items: stretch; padding: 12px; gap: 8px; }
-  .location-wrap { border-left: 0; border-top: 1px solid #071a29; padding-top: 8px; width: 100%; }
-  .job-search > input,
-  .location-wrap input { width: 100%; }
-  .search { width: 100%; }
+  .job-search { flex-direction: column; align-items: stretch; padding: 12px; gap: 8px; width: 100%}
+  .location-wrap {width: 50%; }
+  .location-wrap input { width: 100%; height: 30px; font-size: 12px; align-self: start;}
+  .search { width: 100%; align-self: center; }
+  .job-wrap {
+    width: 50%;
+  }
+  .job-wrap input{
+    border: 0px;
+    height: 30px;
+  }
+  .job-wrap input:focus{
+    outline: none;
+  }
+  .location-wrap input:focus{ outline: none;}
+  .search-space{
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
 }
 </style>

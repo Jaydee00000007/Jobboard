@@ -1,22 +1,26 @@
 <template>
   <section class="company-search">
-    <input
-      v-model="modelSearch"
-      type="text"
-      placeholder="Search by company name or industry"
-      aria-label="Search companies"
-      @input="$emit('update:search', modelSearch)"
-    />
-    <div class="location-wrap">
-      <input
-        v-model="modelLocation"
-        type="text"
-        placeholder="Location e.g. Lagos"
-        aria-label="Search companies by location"
-        @input="$emit('update:location', modelLocation)"
-      />
-      <button type="button" class="search" @click="$emit('search')">Search</button>
+    <div class="searchwrap">
+        <div class="company-wrap">
+            <input
+              v-model="modelSearch"
+              type="text"
+              placeholder="Search by company name or industry"
+              aria-label="Search companies"
+              @input="$emit('update:search', modelSearch)"
+            />
+        </div>
+        <div class="location-wrap">
+          <input
+            v-model="modelLocation"
+            type="text"
+            placeholder="Location e.g. Lagos"
+            aria-label="Search companies by location"
+            @input="$emit('update:location', modelLocation)"
+          /> 
+        </div>
     </div>
+    <button type="button" class="search" @click="$emit('search')">Search</button>
   </section>
 </template>
 
@@ -98,23 +102,35 @@ watch(
 }
 @media (max-width: 700px) {
   .company-search {
-    flex-direction: column;
-    align-items: stretch;
-    padding: 12px;
-    gap: 8px;
+    flex-direction: column; align-items: stretch; padding: 12px; gap: 8px; width: 100%;
   }
-  .location-wrap {
-    border-left: 0;
-    border-top: 1px solid #071a29;
+  .location-wrap{
+    border-left: 1px solid #071a29;
     padding-top: 8px;
-    width: 100%;
+    width: 50%;
+    text-align: center;
   }
-  .company-search > input,
+
+  .company-wrap{
+    padding-top: 8px;
+    text-align: center;
+    width: 50%;
+  }
+
+
+  .company-wrap input,
   .location-wrap input {
-    width: 100%;
+    border: 0px;
+    height: 30px;
+    font-size: 12px; align-self: start;
   }
   .search {
     width: 100%;
+  }
+  .searchwrap{
+    display: flex;
+    justify-content: center;
+    align-items: center;
   }
 }
 </style>
