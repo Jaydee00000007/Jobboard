@@ -148,26 +148,22 @@
       <div class="secB">
         <form>
           <div class="top">
-            <div class="left">
+            <div class="left detail">
               <label for="fullname">Full name</label>
-              <input id="fullname" name="fullname" autocomplete="name" placeholder="Your name" />
+              <input placeholder="Your name" />
             </div>
-            <div class="right">
+            <div class="right detail">
               <label for="email">Email address</label>
-              <input id="email" name="email" type="email" autocomplete="email" placeholder="you@email.com" />
+              <input placeholder="you@email.com" />
             </div>
           </div>
           <div class="subjectp">
             <label for="subject">Subject</label>
-            <input id="subject" name="subject" placeholder="What's this about?" />
+            <input placeholder="What's this about?" />
           </div>
           <div class="messagep">
             <label for="message">Message</label>
-<<<<<<< HEAD
             <textarea placeholder="Tell us more..."></textarea>
-=======
-            <textarea id="message" name="message" rows="6" placeholder="Tell us how we can help."></textarea>
->>>>>>> 5d1d9cbea6538cd40f31a5e454cf118c7684fb50
           </div>
           <button>Send message</button>
         </form>
@@ -653,25 +649,22 @@ export default {
     font-size: 16px;
   }
 
-  .Aboutpage .partD-about .secB {
-    width: 100%;
-  }
-
-  .Aboutpage .partD-about .secB form {
-    width: 100%;
-    gap: 16px;
-  }
-
   .Aboutpage .partD-about .secB .top {
     display: flex;
     flex-direction: column;
-    gap: 16px;
-    padding-top: 0;
+    padding-top: none;    
   }
 
-<<<<<<< HEAD
    .Aboutpage .partD-about .secB .messagep {
    height: 100%;
+  }
+
+  .secA{
+    .sociallink{
+      display: flex;
+      justify-content: space-between;
+      gap: 50px;
+    }
   }
 
   .secB{
@@ -682,44 +675,26 @@ export default {
 
       .top{
         display: flex;
+        height: 50px;
+        width: 47%;
         flex-direction: column;
         flex-wrap: nowrap;
         gap: 0px;
-        padding: 0px;
+
+        .detail{
+          width: 100%;
+        }
       }
       .messagep{
         textarea{
           height: 100px;
         }
       }
+
+      button{
+        align-self: center;
       }
-=======
-  .Aboutpage .partD-about .secB .left,
-  .Aboutpage .partD-about .secB .right,
-  .Aboutpage .partD-about .secB .subjectp,
-  .Aboutpage .partD-about .secB .messagep {
-    width: 100%;
-    min-width: 0;
-    box-sizing: border-box;
-    gap: 6px;
-  }
-
-  .Aboutpage .partD-about .secB input,
-  .Aboutpage .partD-about .secB textarea {
-    width: 100%;
-    max-width: 100%;
-    box-sizing: border-box;
-    margin: 0;
-  }
-
-  .Aboutpage .partD-about .secB textarea {
-    min-height: 140px;
-    resize: vertical;
-  }
-
-  .Aboutpage .partD-about .secB button {
-    width: 100%;
->>>>>>> 5d1d9cbea6538cd40f31a5e454cf118c7684fb50
+      }
   }
 }
 </style>
