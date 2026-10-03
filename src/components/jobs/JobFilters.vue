@@ -66,4 +66,12 @@ const filterSalaryRanges = [
 .clear { border: 0; background: none; color: orange; cursor: pointer; }
 fieldset { border: 0; padding: 0; margin: 0; display: grid; gap: 10px; }\ninput { accent-color: #071a29; }\n.clear:focus-visible, input:focus-visible { outline: 2px solid #36d2ff; outline-offset: 2px; }
 fieldset label { display: flex; align-items: center; gap: 10px; }
+
+@media (max-width: 600px){
+  fieldset{
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+}
 </style>
