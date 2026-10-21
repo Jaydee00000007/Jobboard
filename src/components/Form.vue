@@ -30,11 +30,11 @@
         @keydown.enter.prevent="handleAdd"
       />
       <small v-if="errors.skill" id="register-skill-error" class="error">{{ errors.skill }}</small>
-      <ul>
+      <ul class="skill-list">
         <li v-for="(skill, index) in registration.skills" :key="index">
           {{ skill }}
           <button type="button" :aria-label="`Remove ${skill}`" @click="removeSkill(index)">
-            Remove
+            X
           </button>
         </li>
       </ul>
@@ -258,6 +258,22 @@ p {
 .log a {
   text-decoration: none;
   color: #071a29;
+}
+.skill-list{
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 12px 0 0;
+  text-transform: capitalize;
+
+  button{
+    font-size: 10px;
+    position: relative;
+    padding: 5px 8px;
+    border-radius: 50%;
+  }
 }
 @media (max-width: 900px) {
   .register {
