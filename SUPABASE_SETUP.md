@@ -9,6 +9,8 @@
    - `VITE_SUPABASE_ANON_KEY`
 
 5. In **Authentication → URL Configuration**, set the Site URL to your deployed Jobboard URL and add your local and production callback/redirect URLs.
+6. For the current sign-up flow to sign users in immediately, turn off email confirmation under **Authentication → Providers → Email**. If you prefer confirmation emails, the sign-up screen needs a dedicated “check your inbox” state before enabling that setting.
+7. Redeploy after setting the variables.
 6. Deploy again after setting the variables.
 
 The client uses Supabase Auth for email/password registration and sign-in. The SQL schema prepares isolated profile, saved-job and application tables with row-level security. Do not put a service-role key in the browser or Vercel's client-side variables.
