@@ -426,12 +426,9 @@ export const useJobhuntStore = defineStore(
       const registered = await registerAccount(payload)
       if (!registered) return false
 
-      const account: AuthSession = {
-        name: payload.name || '',
-        email: payload.email.trim().toLowerCase(),
-        skill: payload.skill,
-        userType: payload.userType,
-      }
+      // Supabase may require email confirmation before issuing a session.
+      const account = getAuthSession()
+      if (!account?.accessToken) return false
       authenticate(account)
       notifications.value.unshift({
         id: Date.now(),
