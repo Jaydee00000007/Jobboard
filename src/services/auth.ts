@@ -5,99 +5,60 @@ export interface AuthSession {
   name: string
   skill?: string
   userType?: string
+  accessToken?: string
+  refreshToken?: string
+  userId?: string
 }
 
 const SESSION_KEY = 'jobhunt.session'
-const ACCOUNTS_KEY = 'jobhunt.accounts'
-const PASSWORD_HASH_ITERATIONS = 120_000
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
 
-interface RegisteredAccount extends AuthSession {
-  passwordHash: string
-  passwordSalt: string
+function headers(token?: string) {
+  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+    throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+  }
+  return { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' }
 }
 
-function readAccounts(): RegisteredAccount[] {
-  const raw = localStorage.getItem(ACCOUNTS_KEY)
-  if (!raw) return []
-
-  try {
-    const accounts: unknown = JSON.parse(raw)
-    return Array.isArray(accounts) ? (accounts as RegisteredAccount[]) : []
-  } catch {
-    localStorage.removeItem(ACCOUNTS_KEY)
-    return []
+function toSession(data: any): AuthSession {
+  return {
+    email: data.user?.email || data.email || '',
+    name: data.user?.user_metadata?.name || data.user?.user_metadata?.full_name || '',
+    skill: data.user?.user_metadata?.skill || '',
+    userType: data.user?.user_metadata?.userType || '',
+    accessToken: data.access_token,
+    refreshToken: data.refresh_token,
+    userId: data.user?.id,
   }
 }
 
-function toHex(bytes: Uint8Array) {
-  return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('')
-}
-
-function fromHex(value: string) {
-  return Uint8Array.from(value.match(/.{2}/g) || [], (byte) => Number.parseInt(byte, 16))
-}
-
-async function hashPassword(password: string, salt: Uint8Array) {
-  const key = await crypto.subtle.importKey(
-    'raw',
-    new TextEncoder().encode(password),
-    'PBKDF2',
-    false,
-    ['deriveBits'],
-  )
-  const bits = await crypto.subtle.deriveBits(
-    { name: 'PBKDF2', salt, iterations: PASSWORD_HASH_ITERATIONS, hash: 'SHA-256' },
-    key,
-    256,
-  )
-  return toHex(new Uint8Array(bits))
+async function request(path: string, body: unknown) {
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/${path}`, { method: 'POST', headers: headers(), body: JSON.stringify(body) })
+  const data = await response.json().catch(() => ({}))
+  if (!response.ok) throw new Error(data.msg || data.message || data.error_description || 'Authentication failed.')
+  return data
 }
 
 export async function registerAccount(payload: AuthPayload): Promise<boolean> {
-  const email = payload.email.trim().toLowerCase()
-  const accounts = readAccounts()
-  if (accounts.some((account) => account.email === email)) return false
-
-  const salt = crypto.getRandomValues(new Uint8Array(16))
-  const account: RegisteredAccount = {
-    name: payload.name?.trim() || '',
-    email,
-    skill: payload.skill,
-    userType: payload.userType,
-    passwordSalt: toHex(salt),
-    passwordHash: await hashPassword(payload.password, salt),
-  }
-
-  accounts.push(account)
-  localStorage.setItem(ACCOUNTS_KEY, JSON.stringify(accounts))
+  const data = await request('signup', {
+    email: payload.email.trim().toLowerCase(),
+    password: payload.password,
+    data: { name: payload.name?.trim() || '', skill: payload.skill || '', userType: payload.userType || '' },
+  })
+  if (data.access_token) saveAuthSession(toSession(data))
   return true
 }
 
-export async function verifyCredentials(
-  email: string,
-  password: string,
-): Promise<AuthSession | null> {
-  const normalizedEmail = email.trim().toLowerCase()
-  const account = readAccounts().find((entry) => entry.email === normalizedEmail)
-  if (!account) return null
-
-  const passwordHash = await hashPassword(password, fromHex(account.passwordSalt))
-  if (passwordHash !== account.passwordHash) return null
-
-  return {
-    name: account.name,
-    email: account.email,
-    skill: account.skill,
-    userType: account.userType,
-  }
+export async function verifyCredentials(email: string, password: string): Promise<AuthSession | null> {
+  return toSession(await request('token?grant_type=password', { email: email.trim().toLowerCase(), password }))
 }
 
 export function getAuthSession(): AuthSession | null {
-  const raw = localStorage.getItem(SESSION_KEY)
-  if (!raw) return null
-
+  if (typeof localStorage === 'undefined') return null
   try {
-    return JSON.parse(raw) as AuthSession
+    const raw = localStorage.getItem(SESSION_KEY)
+    return raw ? JSON.parse(raw) as AuthSession : null
   } catch {
     localStorage.removeItem(SESSION_KEY)
     return null
@@ -105,9 +66,17 @@ export function getAuthSession(): AuthSession | null {
 }
 
 export function saveAuthSession(session: AuthSession) {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  if (typeof localStorage !== 'undefined') localStorage.setItem(SESSION_KEY, JSON.stringify(session))
 }
 
 export function clearAuthSession() {
-  localStorage.removeItem(SESSION_KEY)
+  if (typeof localStorage !== 'undefined') localStorage.removeItem(SESSION_KEY)
+}
+
+export async function signOutRemote() {
+  const session = getAuthSession()
+  if (session?.accessToken && SUPABASE_URL && SUPABASE_ANON_KEY) {
+    await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method: 'POST', headers: headers(session.accessToken) })
+  }
+  clearAuthSession()
 }
