@@ -13,10 +13,10 @@ import type {
   UserProfile,
 } from '../types/store'
 import {
-  clearAuthSession,
   getAuthSession,
   registerAccount,
   saveAuthSession,
+  signOutRemote,
   verifyCredentials,
   type AuthSession,
 } from '../services/auth'
@@ -441,7 +441,7 @@ export const useJobhuntStore = defineStore(
     }
 
     function signOut() {
-      clearAuthSession()
+      void signOutRemote()
       isAuthenticated.value = false
     }
 
