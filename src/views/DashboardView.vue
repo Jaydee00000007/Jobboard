@@ -1246,6 +1246,11 @@ function saveProfile() {
   store.updateProfileSkills(skillNames)
   profileEditDialog.value?.close()
 }
+function updateApplicationStatus(application: Application, event: Event) {
+  if (!application.jobId) return
+  const target = event.target as HTMLSelectElement
+  void store.updateApplicationStatus(application.jobId, target.value as ApplicationStatus)
+}
 function toggleApplicationFilter(
   filter: 'all' | 'applied' | 'interview' | 'under-review' | 'offer' | 'not-selected',
 ) {
