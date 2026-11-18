@@ -4,6 +4,7 @@ import type { Job } from '../types/job'
 import {
   fetchUserRecords,
   persistApplication,
+  persistApplicationStatus,
   persistSavedJob,
   saveProfile,
 } from '../services/database'
@@ -311,6 +312,19 @@ export const useJobhuntStore = defineStore(
       }
     }
 
+    async function updateApplicationStatus(jobId: number, status: ApplicationStatus) {
+      try {
+        await persistApplicationStatus(jobId, status)
+        const application = applications.value.find((entry) => entry.jobId === jobId)
+        if (application) application.status = status
+        return true
+      } catch (error) {
+        recordsError.value = error instanceof Error ? error.message : 'Could not update application status.'
+        console.error('Could not update application status:', error)
+        return false
+      }
+    }
+
     function toggleNotificationRead(id: number) {
       notifications.value = notifications.value.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification,
@@ -521,6 +535,7 @@ export const useJobhuntStore = defineStore(
       signOut,
       skills,
       toggleApplicationFilter,
+      updateApplicationStatus,
       toggleNotificationRead,
       toggleSavedJob,
       toggleSkill,
