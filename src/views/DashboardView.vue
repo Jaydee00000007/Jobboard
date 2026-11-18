@@ -270,12 +270,18 @@
                       <td scope="row" data-label="Role">{{ application.role }}</td>
                       <td data-label="Company">{{ application.company }}</td>
                       <td data-label="Status">
-                        <span
+                        <select
                           class="application-status"
-                          :class="`status-${application.status.toLowerCase().replaceAll(' ', '-')}`"
+                          :value="application.status"
+                          :aria-label="`Update status for ${application.role} at ${application.company}`"
+                          @change="updateApplicationStatus(application, $event)"
                         >
-                          {{ application.status }}
-                        </span>
+                          <option value="Applied">Applied</option>
+                          <option value="Interview">Interview</option>
+                          <option value="Under review">Under review</option>
+                          <option value="Offer">Offer</option>
+                          <option value="Not selected">Not selected</option>
+                        </select>
                       </td>
                       <td class="application-date" data-label="Applied">{{ application.date }}</td>
                     </tr>
@@ -783,7 +789,7 @@ import { useRouter } from 'vue-router'
 import HeaderB from '../components/HeaderB.vue'
 import { jobs } from '../data/jobs'
 import { useJobhuntStore } from '../stores/jobhunt'
-import type { UserProfile } from '../types/store'
+import type { Application, ApplicationStatus, UserProfile } from '../types/store'
 
 const store = useJobhuntStore()
 const router = useRouter()
