@@ -28,10 +28,12 @@ Email/password sign-up and sign-in use Supabase Auth. Configure the Site URL and
 
 ## Job listings
 
-The Job Listings page requests active rows from `public.jobs`. If the table is empty or the request fails, the app currently falls back to the bundled demo listings. Do not treat those bundled demo listings as real postings. Add verified listings to `public.jobs` before switching off that fallback.
+The Job Listings page reads only active rows from `public.jobs`. The production page no longer falls back to bundled sample vacancies. The current database has no job rows, so visitors will see an empty-state message until verified listings are published.
+
+Add only genuine vacancies with a source URL and an application URL where available. Do not copy the old sample dataset into the production table.
 
 ## Deployment
 
 After merging the integration pull request, set the two Vercel variables and redeploy. Run the repository's `npm run check` in CI/local development before production release.
 
-The current pass provisions the schema, connects auth, reads published job listings and saves profile edits. Persisting saved-job and application actions from the existing demo listings requires a follow-up: those local demo IDs are not rows in `public.jobs`, so they must not be written against the foreign keys until real listing records exist.
+The integration now loads and persists profiles, saved jobs, applications, and user-managed application statuses. Saved-job and application records reference real `jobs` rows, so the app prevents writes against sample IDs by reading only published database records.
