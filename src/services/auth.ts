@@ -16,7 +16,7 @@ const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || impor
 
 function headers(token?: string) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-    throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY.')
+    throw new Error('Supabase is not configured. Add VITE_SUPABASE_URL and VITE_SUPABASE_PUBLISHABLE_KEY.')
   }
   return { apikey: SUPABASE_ANON_KEY, Authorization: `Bearer ${token || SUPABASE_ANON_KEY}`, 'Content-Type': 'application/json' }
 }
@@ -75,8 +75,11 @@ export function clearAuthSession() {
 
 export async function signOutRemote() {
   const session = getAuthSession()
-  if (session?.accessToken && SUPABASE_URL && SUPABASE_ANON_KEY) {
-    await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method: 'POST', headers: headers(session.accessToken) })
+  try {
+    if (session?.accessToken && SUPABASE_URL && SUPABASE_ANON_KEY) {
+      await fetch(`${SUPABASE_URL}/auth/v1/logout`, { method: 'POST', headers: headers(session.accessToken) })
+    }
+  } finally {
+    clearAuthSession()
   }
-  clearAuthSession()
 }
