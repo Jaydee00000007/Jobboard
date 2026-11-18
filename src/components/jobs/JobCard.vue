@@ -16,7 +16,7 @@
         {{ saved ? 'Saved' : 'Save' }}
       </button>
       <button type="button" :disabled="applied" @click="emit('apply', job)">
-        {{ applied ? 'Applied' : 'Apply' }}
+        {{ applied ? 'Tracked' : 'Track application' }}
       </button>
       <span>Posted {{ job.posted }} ago</span>
     </div>

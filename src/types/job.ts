@@ -16,4 +16,10 @@ export interface Job {
   salaryText: string
   salaryRank: SalaryRank
   posted: string
+  description?: string
+  applicationUrl?: string
+  sourceUrl?: string
+  country?: string
+  eligibleCountries?: string[]
+  remoteScope?: 'Worldwide' | 'Regional' | 'Country-specific' | 'Not applicable'
 }

@@ -1,6 +1,13 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Job } from '../types/job'
+import {
+  fetchUserRecords,
+  persistApplication,
+  persistApplicationStatus,
+  persistSavedJob,
+  saveProfile,
+} from '../services/database'
 import type {
   Application,
   ApplicationStatus,
@@ -13,10 +20,10 @@ import type {
   UserProfile,
 } from '../types/store'
 import {
-  clearAuthSession,
   getAuthSession,
   registerAccount,
   saveAuthSession,
+  signOutRemote,
   verifyCredentials,
   type AuthSession,
 } from '../services/auth'
@@ -47,53 +54,10 @@ export const useJobhuntStore = defineStore(
       resumeName: '',
     })
 
-    const applications = ref<Application[]>([
-      { role: 'Senior Product Designer', company: 'Finotech', status: 'Interview', date: 'Jul 9' },
-      {
-        role: 'Brand & Packaging Lead',
-        company: 'Bramwell & Co.',
-        status: 'Under review',
-        date: 'Jul 6',
-      },
-      { role: 'UX Designer', company: 'Novara', status: 'Offer', date: 'Jun 30' },
-      { role: 'Visual Designer', company: 'Axilo Systems', status: 'Not selected', date: 'Jun 22' },
-      { role: 'Product Designer', company: 'Paruxx', status: 'Under review', date: 'Jun 30' },
-    ])
-
-    const savedJobs = ref<SavedJob[]>([
-      {
-        id: 1,
-        initials: 'DL',
-        title: 'Product designer',
-        location: 'Delta Labs · Lagos',
-        pay: '₦450k - 600k /mo',
-        saved: true,
-      },
-      {
-        id: 2,
-        initials: 'NV',
-        title: 'Brand designer',
-        location: 'Novqra · Remote',
-        pay: '₦500k - 700k /mo',
-        saved: true,
-      },
-      {
-        id: 3,
-        initials: 'FT',
-        title: 'Packaging designer',
-        location: 'Finotech · Lagos',
-        pay: '₦400k - 550k /mo',
-        saved: true,
-      },
-      {
-        id: 4,
-        initials: 'AX',
-        title: 'Visual designer',
-        location: 'Axilo Systems · Lagos',
-        pay: '₦350k - 480k /mo',
-        saved: true,
-      },
-    ])
+    const applications = ref<Application[]>([])
+    const savedJobs = ref<SavedJob[]>([])
+    const recordsLoading = ref(false)
+    const recordsError = ref('')
 
     const inboxMessages = ref<Message[]>([
       {
@@ -270,6 +234,39 @@ export const useJobhuntStore = defineStore(
       activeApplicationFilter.value = filter
     }
 
+    async function loadUserRecords() {
+      if (!isAuthenticated.value) return
+      recordsLoading.value = true
+      recordsError.value = ''
+      try {
+        const records = await fetchUserRecords()
+        savedJobs.value = records.saved
+        applications.value = records.applications
+        if (records.profile) {
+          const profile = records.profile
+          userProfile.value = {
+            ...userProfile.value,
+            name: profile.full_name || userProfile.value.name,
+            email: profile.email || userProfile.value.email,
+            role: profile.role || '',
+            location: profile.location || '',
+            phoneNumber: profile.phone_number || '',
+            skill: profile.skills.join(', '),
+            about: profile.about || '',
+            birthDate: profile.birth_date || '',
+            linkedinUrl: profile.linkedin_url || '',
+            resumeName: profile.resume_name || '',
+          }
+          skills.value = profile.skills.map((name, index) => ({ id: index + 1, name, selected: true }))
+        }
+      } catch (error) {
+        recordsError.value = error instanceof Error ? error.message : 'Could not load your account records.'
+        console.error('Could not load Jobboard account records:', error)
+      } finally {
+        recordsLoading.value = false
+      }
+    }
+
     function isJobSaved(jobId: number) {
       return savedJobs.value.some((job) => job.id === jobId && job.saved)
     }
@@ -278,27 +275,54 @@ export const useJobhuntStore = defineStore(
       return applications.value.some((application) => application.jobId === jobId)
     }
 
-    function toggleSavedJob(job: Job | number) {
+    async function toggleSavedJob(job: Job | number) {
+      if (!isAuthenticated.value) return false
       const jobId = typeof job === 'object' ? job.id : job
       const existingJob = savedJobs.value.find((entry) => entry.id === jobId)
-      if (existingJob) {
-        existingJob.saved = !existingJob.saved
-        return
-      }
-      if (typeof job === 'object') {
-        savedJobs.value.push({
-          id: job.id,
-          initials: job.initials,
-          title: job.title,
-          location: `${job.company} · ${job.location}`,
-          pay: job.salaryText,
-          saved: true,
-        })
+      const shouldSave = !existingJob
+      try {
+        await persistSavedJob(jobId, shouldSave)
+        if (shouldSave && typeof job === 'object') {
+          savedJobs.value.unshift({
+            id: job.id,
+            initials: job.initials,
+            title: job.title,
+            location: `${job.company} · ${job.location}`,
+            pay: job.salaryText,
+            saved: true,
+          })
+        } else if (!shouldSave) {
+          savedJobs.value = savedJobs.value.filter((entry) => entry.id !== jobId)
+        }
+        return true
+      } catch (error) {
+        recordsError.value = error instanceof Error ? error.message : 'Could not update your saved jobs.'
+        console.error('Could not update saved job:', error)
+        return false
       }
     }
 
-    function removeSavedJob(jobId: number) {
-      savedJobs.value = savedJobs.value.filter((job) => job.id !== jobId)
+    async function removeSavedJob(jobId: number) {
+      try {
+        await persistSavedJob(jobId, false)
+        savedJobs.value = savedJobs.value.filter((job) => job.id !== jobId)
+      } catch (error) {
+        recordsError.value = error instanceof Error ? error.message : 'Could not remove this saved job.'
+        console.error('Could not remove saved job:', error)
+      }
+    }
+
+    async function updateApplicationStatus(jobId: number, status: ApplicationStatus) {
+      try {
+        await persistApplicationStatus(jobId, status)
+        const application = applications.value.find((entry) => entry.jobId === jobId)
+        if (application) application.status = status
+        return true
+      } catch (error) {
+        recordsError.value = error instanceof Error ? error.message : 'Could not update application status.'
+        console.error('Could not update application status:', error)
+        return false
+      }
     }
 
     function toggleNotificationRead(id: number) {
@@ -354,6 +378,7 @@ export const useJobhuntStore = defineStore(
         .join('')
         .toUpperCase()
       userProfile.value = { ...userProfile.value, ...profile, name, initials }
+      if (isAuthenticated.value) void saveProfile(userProfile.value).catch((error) => console.error('Could not save profile:', error))
     }
     function updateProfileSkills(names: string[]) {
       const uniqueNames = [...new Set(names.map((name) => name.trim()).filter(Boolean))]
@@ -405,6 +430,7 @@ export const useJobhuntStore = defineStore(
       }
       isAuthenticated.value = true
       saveAuthSession(account)
+      void loadUserRecords()
     }
 
     async function signIn(payload: AuthPayload) {
@@ -426,12 +452,9 @@ export const useJobhuntStore = defineStore(
       const registered = await registerAccount(payload)
       if (!registered) return false
 
-      const account: AuthSession = {
-        name: payload.name || '',
-        email: payload.email.trim().toLowerCase(),
-        skill: payload.skill,
-        userType: payload.userType,
-      }
+      // Supabase may require email confirmation before issuing a session.
+      const account = getAuthSession()
+      if (!account?.accessToken) return false
       authenticate(account)
       notifications.value.unshift({
         id: Date.now(),
@@ -444,30 +467,40 @@ export const useJobhuntStore = defineStore(
     }
 
     function signOut() {
-      clearAuthSession()
+      void signOutRemote()
       isAuthenticated.value = false
+      applications.value = []
+      savedJobs.value = []
+      recordsError.value = ''
     }
 
-    function applyForJob(job: Job) {
+    async function applyForJob(job: Job) {
       if (!isAuthenticated.value || isJobApplied(job.id)) return false
-
-      applications.value.unshift({
-        jobId: job.id,
-        role: job.title,
-        company: job.company,
-        status: 'Applied',
-        date: 'Just now',
-      })
-      notifications.value.unshift({
-        id: Date.now(),
-        message: `You applied to ${job.title} at ${job.company}.`,
-        time: 'Just now',
-        type: 'success',
-        read: false,
-      })
-
-      return true
+      try {
+        await persistApplication(job.id)
+        applications.value.unshift({
+          jobId: job.id,
+          role: job.title,
+          company: job.company,
+          status: 'Applied',
+          date: 'Just now',
+        })
+        notifications.value.unshift({
+          id: Date.now(),
+          message: `Your application to ${job.title} at ${job.company} has been saved to your tracker.`,
+          time: 'Just now',
+          type: 'success',
+          read: false,
+        })
+        return true
+      } catch (error) {
+        recordsError.value = error instanceof Error ? error.message : 'Could not record your application.'
+        console.error('Could not save application:', error)
+        return false
+      }
     }
+
+    if (session) void loadUserRecords()
 
     return {
       activeApplicationFilter,
@@ -476,6 +509,9 @@ export const useJobhuntStore = defineStore(
       allNotificationsRead,
       applicationFilters,
       applications,
+      recordsLoading,
+      recordsError,
+      loadUserRecords,
       deleteMessage,
       filteredApplications,
       inboxMessages,
@@ -499,6 +535,7 @@ export const useJobhuntStore = defineStore(
       signOut,
       skills,
       toggleApplicationFilter,
+      updateApplicationStatus,
       toggleNotificationRead,
       toggleSavedJob,
       toggleSkill,

@@ -4,7 +4,7 @@
 
     <main>
       <section class="hero">
-        <h3>{{ filteredJobs.length }} VERIFIED VACANCIES LIVE NOW</h3>
+        <h3>{{ filteredJobs.length }} LIVE JOB LISTINGS</h3>
         <h2>Find your next role.</h2>
         <JobSearch
           :search="searchQuery"
@@ -66,7 +66,9 @@
                   @apply="applyForJob"
                 />
               </div>
-              <p v-else class="empty-state">No jobs match your current filters.</p>
+              <p v-else-if="jobsLoading" class="empty-state">Loading live job listings...</p>
+              <p v-else-if="jobsError" class="empty-state" role="alert">{{ jobsError }}</p>
+              <p v-else class="empty-state">No published vacancies are available yet. Please check back soon.</p>
 
               <nav class="pagination" aria-label="Job results pagination">
                 <button type="button" :disabled="currentPage === 1" @click="prevPage">
@@ -88,7 +90,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useJobhuntStore } from '../stores/jobhunt'
 import HeaderB from '../components/HeaderB.vue'
@@ -96,10 +98,24 @@ import Footer from '../components/Footer.vue'
 import JobCard from '../components/jobs/JobCard.vue'
 import JobFilters from '../components/jobs/JobFilters.vue'
 import JobSearch from '../components/jobs/JobSearch.vue'
-import { jobs } from '../data/jobs'
+import { fetchPublishedJobs } from '../services/database'
 import type { ExperienceLevel, Job, JobType, SalaryRank } from '../types/job'
 
 const store = useJobhuntStore()
+const jobs = ref<Job[]>([])
+const jobsLoading = ref(true)
+const jobsError = ref('')
+onMounted(async () => {
+  try {
+    const publishedJobs = await fetchPublishedJobs()
+    jobs.value = publishedJobs
+  } catch (error) {
+    jobsError.value = error instanceof Error ? error.message : 'Job listings are temporarily unavailable.'
+    console.error('Could not load published jobs from Supabase:', error)
+  } finally {
+    jobsLoading.value = false
+  }
+})
 const route = useRoute()
 const router = useRouter()
 
@@ -121,7 +137,7 @@ const selectedJobId = computed(() => {
 })
 
 const categories = computed(() => {
-  const counts = jobs.reduce<Record<string, number>>((result, job) => {
+  const counts = jobs.value.reduce<Record<string, number>>((result, job) => {
     result[job.category] = (result[job.category] || 0) + 1
     return result
   }, {})
@@ -136,13 +152,16 @@ const filteredJobs = computed(() => {
   const search = searchQuery.value.toLowerCase().trim()
   const location = locationQuery.value.toLowerCase().trim()
 
-  return jobs
+  return jobs.value
     .filter((job) => {
       const matchesSelectedJob = !selectedJobId.value || job.id === selectedJobId.value
       const matchesSearch =
         !search ||
         [job.title, job.company, job.category].some((field) => field.toLowerCase().includes(search))
-      const matchesLocation = !location || job.location.toLowerCase().includes(location)
+      const matchesLocation =
+        !location ||
+        [job.location, job.country || '', ...(job.eligibleCountries || [])]
+          .some((field) => field.toLowerCase().includes(location))
       const matchesCategory =
         !selectedCategory.value ||
         job.category.toLowerCase() === selectedCategory.value.toLowerCase()
