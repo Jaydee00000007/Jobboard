@@ -12,7 +12,7 @@ export interface AuthSession {
 
 const SESSION_KEY = 'jobhunt.session'
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
-const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY
+const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY
 
 function headers(token?: string) {
   if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
