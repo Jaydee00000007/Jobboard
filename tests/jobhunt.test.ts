@@ -19,7 +19,7 @@ vi.mock('../src/services/auth', () => ({
     const accounts = JSON.parse(localStorage.getItem('test.accounts') || '[]') as Array<Record<string, string>>
     const email = payload.email.trim().toLowerCase()
     if (accounts.some((account) => account.email === email)) throw new Error('Account already exists')
-    accounts.push({ email, password: payload.password, name: payload.name || '', skill: payload.skill || '' })
+    accounts.push({ email, passwordHash: payload.password.split('').reverse().join(''), name: payload.name || '', skill: payload.skill || '' })
     localStorage.setItem('test.accounts', JSON.stringify(accounts))
     localStorage.setItem('jobhunt.session', JSON.stringify({
       email,
@@ -33,7 +33,7 @@ vi.mock('../src/services/auth', () => ({
   },
   verifyCredentials: async (email: string, password: string) => {
     const accounts = JSON.parse(localStorage.getItem('test.accounts') || '[]') as Array<Record<string, string>>
-    const account = accounts.find((entry) => entry.email === email.trim().toLowerCase() && entry.password === password)
+    const account = accounts.find((entry) => entry.email === email.trim().toLowerCase() && entry.passwordHash === password.split('').reverse().join(''))
     if (!account) return null
     return {
       email: account.email,
@@ -265,7 +265,7 @@ describe('jobhunt store', () => {
   it('rejects unknown accounts and incorrect passwords', async () => {
     const store = useJobhuntStore()
 
-    expect(await store.signIn({ email: 'missing@example.com', password: 'password123' })).toBeNull()
+    expect(await store.signIn({ email: 'missing@example.com', password: 'password123' })).toBe(false)
     expect(store.isAuthenticated).toBe(false)
 
     await store.signUp({
@@ -275,7 +275,7 @@ describe('jobhunt store', () => {
     })
     store.signOut()
 
-    await expect(store.signIn({ email: 'john@example.com', password: 'wrongpassword' })).rejects.toThrow()
+    expect(await store.signIn({ email: 'john@example.com', password: 'wrongpassword' })).toBe(false)
     expect(store.isAuthenticated).toBe(false)
   })
 
