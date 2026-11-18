@@ -158,7 +158,10 @@ const filteredJobs = computed(() => {
       const matchesSearch =
         !search ||
         [job.title, job.company, job.category].some((field) => field.toLowerCase().includes(search))
-      const matchesLocation = !location || job.location.toLowerCase().includes(location)
+      const matchesLocation =
+        !location ||
+        [job.location, job.country || '', ...(job.eligibleCountries || [])]
+          .some((field) => field.toLowerCase().includes(location))
       const matchesCategory =
         !selectedCategory.value ||
         job.category.toLowerCase() === selectedCategory.value.toLowerCase()
