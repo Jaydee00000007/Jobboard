@@ -102,13 +102,11 @@ import type { ExperienceLevel, Job, JobType, SalaryRank } from '../types/job'
 
 const store = useJobhuntStore()
 const jobs = ref<Job[]>(demoJobs)
-const usingDemoJobs = ref(true)
 onMounted(async () => {
   try {
     const publishedJobs = await fetchPublishedJobs()
     if (publishedJobs.length) {
       jobs.value = publishedJobs
-      usingDemoJobs.value = false
     }
   } catch (error) {
     console.error('Could not load published jobs from Supabase:', error)
@@ -150,7 +148,7 @@ const filteredJobs = computed(() => {
   const search = searchQuery.value.toLowerCase().trim()
   const location = locationQuery.value.toLowerCase().trim()
 
-  return jobs
+  return jobs.value
     .filter((job) => {
       const matchesSelectedJob = !selectedJobId.value || job.id === selectedJobId.value
       const matchesSearch =
