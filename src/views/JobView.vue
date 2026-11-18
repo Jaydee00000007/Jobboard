@@ -88,7 +88,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useJobhuntStore } from '../stores/jobhunt'
 import HeaderB from '../components/HeaderB.vue'
@@ -96,10 +96,24 @@ import Footer from '../components/Footer.vue'
 import JobCard from '../components/jobs/JobCard.vue'
 import JobFilters from '../components/jobs/JobFilters.vue'
 import JobSearch from '../components/jobs/JobSearch.vue'
-import { jobs } from '../data/jobs'
+import { jobs as demoJobs } from '../data/jobs'
+import { fetchPublishedJobs } from '../services/database'
 import type { ExperienceLevel, Job, JobType, SalaryRank } from '../types/job'
 
 const store = useJobhuntStore()
+const jobs = ref<Job[]>(demoJobs)
+const usingDemoJobs = ref(true)
+onMounted(async () => {
+  try {
+    const publishedJobs = await fetchPublishedJobs()
+    if (publishedJobs.length) {
+      jobs.value = publishedJobs
+      usingDemoJobs.value = false
+    }
+  } catch (error) {
+    console.error('Could not load published jobs from Supabase:', error)
+  }
+})
 const route = useRoute()
 const router = useRouter()
 
@@ -121,7 +135,7 @@ const selectedJobId = computed(() => {
 })
 
 const categories = computed(() => {
-  const counts = jobs.reduce<Record<string, number>>((result, job) => {
+  const counts = jobs.value.reduce<Record<string, number>>((result, job) => {
     result[job.category] = (result[job.category] || 0) + 1
     return result
   }, {})
