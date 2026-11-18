@@ -16,7 +16,7 @@ function headers(prefer?: string) {
   }
 }
 
-async function request<T>(path: string, init: RequestInit = {}): Promise<T> {
+async function request<T>(path: string, init: { method?: string; headers?: Record<string, string>; body?: string } = {}): Promise<T> {
   const response = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
     ...init,
     headers: { ...headers(), ...(init.headers || {}) },
