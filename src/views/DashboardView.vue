@@ -61,6 +61,8 @@
         </div>
 
         <div class="tab-content mt-2 page-content">
+          <p v-if="recordsError" class="alert alert-warning" role="alert">{{ recordsError }}</p>
+          <p v-else-if="recordsLoading" class="text-muted" role="status">Syncing your account with Supabase...</p>
           <div v-if="activeTab === 'overview'" class="tab-pane fade show active">
             <div class="overview-header">
               <div class="header-1"><h2>Overview</h2></div>
@@ -1044,6 +1046,8 @@ const notificationsPerPage = 2
 const activeMessageId = computed(() => store.activeMessageId)
 const replyStatus = computed(() => store.replyStatus)
 const applications = computed(() => store.applications)
+const recordsLoading = computed(() => store.recordsLoading)
+const recordsError = computed(() => store.recordsError)
 const savedJobs = computed(() => store.savedJobs.filter((job) => job.saved))
 const inboxMessages = computed(() => store.inboxMessages)
 const notifications = computed(() => store.notifications)
