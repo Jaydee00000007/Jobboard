@@ -1,6 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 import type { Job } from '../types/job'
+import { fetchUserRecords, saveProfile } from '../services/database'
 import type {
   Application,
   ApplicationStatus,
@@ -354,6 +355,7 @@ export const useJobhuntStore = defineStore(
         .join('')
         .toUpperCase()
       userProfile.value = { ...userProfile.value, ...profile, name, initials }
+      if (isAuthenticated.value) void saveProfile(userProfile.value).catch((error) => console.error('Could not save profile:', error))
     }
     function updateProfileSkills(names: string[]) {
       const uniqueNames = [...new Set(names.map((name) => name.trim()).filter(Boolean))]
@@ -405,6 +407,22 @@ export const useJobhuntStore = defineStore(
       }
       isAuthenticated.value = true
       saveAuthSession(account)
+      void fetchUserRecords().then(({ profile }) => {
+        if (!profile) return
+        userProfile.value = {
+          ...userProfile.value,
+          name: profile.full_name || userProfile.value.name,
+          email: profile.email || userProfile.value.email,
+          role: profile.role || '',
+          location: profile.location || '',
+          phoneNumber: profile.phone_number || '',
+          skill: Array.isArray(profile.skills) ? profile.skills.join(', ') : '',
+          about: profile.about || '',
+          birthDate: profile.birth_date || '',
+          linkedinUrl: profile.linkedin_url || '',
+          resumeName: profile.resume_name || '',
+        }
+      }).catch((error) => console.error('Could not load profile:', error))
     }
 
     async function signIn(payload: AuthPayload) {
