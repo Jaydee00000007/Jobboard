@@ -16,4 +16,7 @@ export interface Job {
   salaryText: string
   salaryRank: SalaryRank
   posted: string
+  description?: string
+  applicationUrl?: string
+  sourceUrl?: string
 }
