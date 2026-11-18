@@ -1,5 +1,5 @@
 import type { Job } from '../types/job'
-import type { ApplicationStatus, SavedJob, UserProfile } from '../types/store'
+import type { ApplicationStatus, UserProfile } from '../types/store'
 import { getAuthSession } from './auth'
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL?.replace(/\/$/, '')
