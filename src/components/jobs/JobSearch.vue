@@ -14,7 +14,7 @@
                 <input
                   v-model="modelLocation"
                   type="text"
-                  placeholder="Location e.g. Lagos"
+                  placeholder="City, country or region"
                   aria-label="Search jobs by location"
                   @input="$emit('update:location', modelLocation)"
                 />
