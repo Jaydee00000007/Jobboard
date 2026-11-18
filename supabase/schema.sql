@@ -6,6 +6,9 @@ create table if not exists public.jobs (
   title text not null,
   company text not null,
   location text not null,
+  country text not null default 'Worldwide',
+  eligible_countries text[] not null default '{}',
+  remote_scope text not null default 'Country-specific' check (remote_scope in ('Worldwide','Regional','Country-specific','Not applicable')),
   employment_type text not null check (employment_type in ('Full-time','Part-time','Contract','Internship','Freelance')),
   experience_level text not null check (experience_level in ('Entry level','Mid level','Senior','Lead / Manager')),
   work_mode text not null check (work_mode in ('Remote','Hybrid','On-site','Remote-friendly')),
@@ -24,6 +27,9 @@ create table if not exists public.jobs (
 create index if not exists jobs_active_posted_idx on public.jobs (is_active, posted_at desc);
 create index if not exists jobs_category_idx on public.jobs (category);
 create index if not exists jobs_location_idx on public.jobs (location);
+create index if not exists jobs_country_idx on public.jobs(country);
+create index if not exists jobs_remote_scope_idx on public.jobs(remote_scope);
+create index if not exists jobs_eligible_countries_idx on public.jobs using gin(eligible_countries);
 
 create table if not exists public.profiles (
   id uuid primary key references auth.users(id) on delete cascade,
