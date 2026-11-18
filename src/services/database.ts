@@ -12,6 +12,9 @@ interface DbJob {
   title: string
   company: string
   location: string
+  country: string
+  eligible_countries: string[]
+  remote_scope: 'Worldwide' | 'Regional' | 'Country-specific' | 'Not applicable'
   employment_type: Job['type']
   experience_level: Job['experienceLevel']
   work_mode: Job['workMode']
@@ -85,6 +88,9 @@ function mapJob(row: DbJob): Job {
     title: row.title,
     company: row.company,
     location: row.location,
+    country: row.country,
+    eligibleCountries: row.eligible_countries || [],
+    remoteScope: row.remote_scope,
     type: row.employment_type,
     experienceLevel: row.experience_level,
     workMode: row.work_mode,
