@@ -1,7 +1,58 @@
-import { beforeEach, describe, expect, it } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
 import { useJobhuntStore } from '../src/stores/jobhunt'
 import { jobs } from '../src/data/jobs'
+
+vi.mock('../src/services/auth', () => ({
+  getAuthSession: () => {
+    const raw = localStorage.getItem('jobhunt.session')
+    return raw ? JSON.parse(raw) : null
+  },
+  saveAuthSession: (session: unknown) => {
+    localStorage.setItem('jobhunt.session', JSON.stringify(session))
+  },
+  clearAuthSession: () => localStorage.removeItem('jobhunt.session'),
+  signOutRemote: async () => {
+    localStorage.removeItem('jobhunt.session')
+  },
+  registerAccount: async (payload: { name?: string; email: string; password: string; skill?: string }) => {
+    const accounts = JSON.parse(localStorage.getItem('test.accounts') || '[]') as Array<Record<string, string>>
+    const email = payload.email.trim().toLowerCase()
+    if (accounts.some((account) => account.email === email)) throw new Error('Account already exists')
+    accounts.push({ email, password: payload.password, name: payload.name || '', skill: payload.skill || '' })
+    localStorage.setItem('test.accounts', JSON.stringify(accounts))
+    localStorage.setItem('jobhunt.session', JSON.stringify({
+      email,
+      name: payload.name || '',
+      skill: payload.skill || '',
+      accessToken: 'test-access-token',
+      refreshToken: 'test-refresh-token',
+      userId: 'test-user-id',
+    }))
+    return true
+  },
+  verifyCredentials: async (email: string, password: string) => {
+    const accounts = JSON.parse(localStorage.getItem('test.accounts') || '[]') as Array<Record<string, string>>
+    const account = accounts.find((entry) => entry.email === email.trim().toLowerCase() && entry.password === password)
+    if (!account) return null
+    return {
+      email: account.email,
+      name: account.name,
+      skill: account.skill,
+      accessToken: 'test-access-token',
+      refreshToken: 'test-refresh-token',
+      userId: 'test-user-id',
+    }
+  },
+}))
+
+vi.mock('../src/services/database', () => ({
+  fetchUserRecords: async () => ({ profile: null, saved: [], applications: [] }),
+  saveProfile: async () => undefined,
+  persistSavedJob: async () => undefined,
+  persistApplication: async () => undefined,
+  persistApplicationStatus: async () => undefined,
+}))
 
 const storage = new Map<string, string>()
 
@@ -24,12 +75,12 @@ describe('jobhunt store', () => {
     setActivePinia(createPinia())
   })
 
-  it('starts with the expected dashboard state', () => {
+  it('starts with an empty account job tracker', () => {
     const store = useJobhuntStore()
 
     expect(store.isAuthenticated).toBe(false)
-    expect(store.applications).toHaveLength(5)
-    expect(store.savedJobsCount).toBe(4)
+    expect(store.applications).toHaveLength(0)
+    expect(store.savedJobsCount).toBe(0)
     expect(store.unreadMessageCount).toBe(2)
   })
 
@@ -108,71 +159,65 @@ describe('jobhunt store', () => {
     expect(store.skills.map((skill) => skill.name)).toEqual(['Research', 'Accessibility'])
   })
 
-  it('filters applications by status', () => {
+  it('filters persisted applications by status', async () => {
     const store = useJobhuntStore()
-
-    store.toggleApplicationFilter('interview')
-    expect(store.filteredApplications).toHaveLength(1)
-    expect(store.filteredApplications[0].status).toBe('Interview')
-
-    store.toggleApplicationFilter('offer')
-    expect(store.filteredApplications).toHaveLength(1)
-    expect(store.filteredApplications[0].company).toBe('Novara')
-
+    store.isAuthenticated = true
     const job = jobs[0]
-    store.applyForJob(job)
+
+    expect(await store.applyForJob(job)).toBe(true)
     store.toggleApplicationFilter('applied')
     expect(store.filteredApplications).toHaveLength(1)
     expect(store.filteredApplications[0].jobId).toBe(job.id)
   })
 
-  it('saves and unsaves a job', () => {
+  it('saves and unsaves a job for an authenticated account', async () => {
     const store = useJobhuntStore()
-    const job = jobs.find((entry) => !store.isJobSaved(entry.id))!
+    store.isAuthenticated = true
+    const job = jobs[0]
 
     expect(store.isJobSaved(job.id)).toBe(false)
-
-    store.toggleSavedJob(job)
+    expect(await store.toggleSavedJob(job)).toBe(true)
     expect(store.isJobSaved(job.id)).toBe(true)
-    expect(store.savedJobsCount).toBe(5)
+    expect(store.savedJobsCount).toBe(1)
 
-    store.toggleSavedJob(job.id)
+    expect(await store.toggleSavedJob(job.id)).toBe(true)
     expect(store.isJobSaved(job.id)).toBe(false)
-    expect(store.savedJobsCount).toBe(4)
+    expect(store.savedJobsCount).toBe(0)
   })
 
-  it('removes a saved job and allows it to be saved again', () => {
+  it('removes a saved job and allows it to be saved again', async () => {
     const store = useJobhuntStore()
-    const job = jobs.find((entry) => !store.isJobSaved(entry.id))!
+    store.isAuthenticated = true
+    const job = jobs[0]
 
-    store.toggleSavedJob(job)
+    await store.toggleSavedJob(job)
     expect(store.savedJobs.some((entry) => entry.id === job.id && entry.saved)).toBe(true)
 
-    store.removeSavedJob(job.id)
+    await store.removeSavedJob(job.id)
     expect(store.savedJobs.some((entry) => entry.id === job.id)).toBe(false)
     expect(store.isJobSaved(job.id)).toBe(false)
-    expect(store.savedJobsCount).toBe(4)
+    expect(store.savedJobsCount).toBe(0)
 
-    store.toggleSavedJob(job)
+    await store.toggleSavedJob(job)
     expect(store.isJobSaved(job.id)).toBe(true)
   })
 
-  it('does not create a job application when signed out', () => {
+  it('does not create a job application when signed out', async () => {
     const store = useJobhuntStore()
     const job = jobs[0]
 
     expect(store.isJobApplied(job.id)).toBe(false)
-    expect(store.applyForJob(job)).toBe(false)
+    expect(await store.applyForJob(job)).toBe(false)
     expect(store.isJobApplied(job.id)).toBe(false)
   })
 
-  it('reflects the applied job in the dashboard overview state', () => {
+  it('reflects a saved application in the dashboard overview state', async () => {
     const store = useJobhuntStore()
+    store.isAuthenticated = true
     const job = jobs[1]
 
-    expect(store.recentApplications[0].role).not.toBe(job.title)
-
-    store.applyForJob(job)
+    expect(store.recentApplications).toHaveLength(0)
+    expect(await store.applyForJob(job)).toBe(true)
 
     expect(store.applications[0]).toMatchObject({
       jobId: job.id,
@@ -182,6 +227,16 @@ describe('jobhunt store', () => {
     })
     expect(store.recentApplications[0].role).toBe(job.title)
     expect(store.overviewStats[0].value).toBe(store.applications.length)
+  })
+
+  it('persists application status changes', async () => {
+    const store = useJobhuntStore()
+    store.isAuthenticated = true
+    const job = jobs[2]
+    await store.applyForJob(job)
+
+    expect(await store.updateApplicationStatus(job.id, 'Interview')).toBe(true)
+    expect(store.applications[0].status).toBe('Interview')
   })
 
   it('registers an account and signs in with its saved credentials', async () => {
@@ -194,7 +249,7 @@ describe('jobhunt store', () => {
     }
 
     expect(await store.signUp(credentials)).toBe(true)
-    expect(localStorage.getItem('jobhunt.accounts')).not.toContain(credentials.password)
+    expect(localStorage.getItem('test.accounts')).not.toContain(credentials.password)
 
     store.signOut()
     expect(await store.signIn(credentials)).toBe(true)
@@ -210,9 +265,7 @@ describe('jobhunt store', () => {
   it('rejects unknown accounts and incorrect passwords', async () => {
     const store = useJobhuntStore()
 
-    expect(await store.signIn({ email: 'missing@example.com', password: 'password123' })).toBe(
-      false,
-    )
+    expect(await store.signIn({ email: 'missing@example.com', password: 'password123' })).toBeNull()
     expect(store.isAuthenticated).toBe(false)
 
     await store.signUp({
@@ -222,7 +275,7 @@ describe('jobhunt store', () => {
     })
     store.signOut()
 
-    expect(await store.signIn({ email: 'john@example.com', password: 'wrongpassword' })).toBe(false)
+    await expect(store.signIn({ email: 'john@example.com', password: 'wrongpassword' })).rejects.toThrow()
     expect(store.isAuthenticated).toBe(false)
   })
 
@@ -230,7 +283,6 @@ describe('jobhunt store', () => {
     const store = useJobhuntStore()
 
     expect(store.allNotificationsRead).toBe(false)
-
     store.markAllNotificationsRead()
 
     expect(store.allNotificationsRead).toBe(true)
@@ -242,7 +294,6 @@ describe('jobhunt store', () => {
     const store = useJobhuntStore()
 
     expect(store.notifications[0].read).toBe(false)
-
     store.toggleNotificationRead(store.notifications[0].id)
 
     expect(store.notifications).toHaveLength(3)
