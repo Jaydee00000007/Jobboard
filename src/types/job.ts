@@ -19,4 +19,7 @@ export interface Job {
   description?: string
   applicationUrl?: string
   sourceUrl?: string
+  country?: string
+  eligibleCountries?: string[]
+  remoteScope?: 'Worldwide' | 'Regional' | 'Country-specific' | 'Not applicable'
 }
