@@ -4,7 +4,7 @@
 
     <main>
       <section class="hero">
-        <h3>{{ filteredJobs.length }} VERIFIED VACANCIES LIVE NOW</h3>
+        <h3>{{ filteredJobs.length }} LIVE JOB LISTINGS</h3>
         <h2>Find your next role.</h2>
         <JobSearch
           :search="searchQuery"
@@ -66,7 +66,9 @@
                   @apply="applyForJob"
                 />
               </div>
-              <p v-else class="empty-state">No jobs match your current filters.</p>
+              <p v-else-if="jobsLoading" class="empty-state">Loading live job listings...</p>
+              <p v-else-if="jobsError" class="empty-state" role="alert">{{ jobsError }}</p>
+              <p v-else class="empty-state">No published vacancies are available yet. Please check back soon.</p>
 
               <nav class="pagination" aria-label="Job results pagination">
                 <button type="button" :disabled="currentPage === 1" @click="prevPage">
@@ -96,20 +98,22 @@ import Footer from '../components/Footer.vue'
 import JobCard from '../components/jobs/JobCard.vue'
 import JobFilters from '../components/jobs/JobFilters.vue'
 import JobSearch from '../components/jobs/JobSearch.vue'
-import { jobs as demoJobs } from '../data/jobs'
 import { fetchPublishedJobs } from '../services/database'
 import type { ExperienceLevel, Job, JobType, SalaryRank } from '../types/job'
 
 const store = useJobhuntStore()
-const jobs = ref<Job[]>(demoJobs)
+const jobs = ref<Job[]>([])
+const jobsLoading = ref(true)
+const jobsError = ref('')
 onMounted(async () => {
   try {
     const publishedJobs = await fetchPublishedJobs()
-    if (publishedJobs.length) {
-      jobs.value = publishedJobs
-    }
+    jobs.value = publishedJobs
   } catch (error) {
+    jobsError.value = error instanceof Error ? error.message : 'Job listings are temporarily unavailable.'
     console.error('Could not load published jobs from Supabase:', error)
+  } finally {
+    jobsLoading.value = false
   }
 })
 const route = useRoute()
