@@ -486,6 +486,8 @@ export const useJobhuntStore = defineStore(
       }
     }
 
+    if (session) void loadUserRecords()
+
     return {
       activeApplicationFilter,
       activeMessageId,
